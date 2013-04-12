@@ -7,7 +7,6 @@
         <Value>
           <frames>1</frames>
           <updateTime>0</updateTime>
-          <speed>0</speed>
         </Value>
       </Item>
       <Item>
@@ -15,7 +14,6 @@
         <Value>
           <frames>8</frames>
           <updateTime>100</updateTime>
-          <speed>0</speed>
         </Value>
       </Item>
       <Item>
@@ -23,7 +21,6 @@
         <Value>
           <frames>8</frames>
           <updateTime>75</updateTime>
-          <speed>0</speed>
         </Value>
       </Item>
     </collectibles>

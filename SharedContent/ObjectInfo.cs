@@ -9,6 +9,6 @@ namespace SharedContent
     public class ObjectInfo
     {
         public Dictionary<CollectibleEnum, GameObject> collectibles;
-        public Dictionary<EnemyEnum, GameObject> enemies;
+        public Dictionary<EnemyEnum, EnemyObject> enemies;
     }
 }

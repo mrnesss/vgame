@@ -94,6 +94,7 @@
   <ItemGroup>
     <Compile Include="Derp.cs" />
     <Compile Include="Direction.cs" />
+    <Compile Include="EnemyObject.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="CollectibleEnum.cs" />
     <Compile Include="EnemyEnum.cs" />

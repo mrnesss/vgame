@@ -26,6 +26,7 @@ namespace TestGame
         Viewport viewport;
         Map map;
         ObjectInfo objectInfo;
+        Texture2D background;
 
         Player player;
         bool pause = false;
@@ -45,7 +46,7 @@ namespace TestGame
         Dictionary<Enum, Sprite> mapSprites = new Dictionary<Enum, Sprite>();
         Dictionary<CollectibleEnum, int> itemCounter = new Dictionary<CollectibleEnum, int>();
         List<GameObject> mapItems = new List<GameObject>();
-        List<GameObject> mapEnemies = new List<GameObject>();
+        List<EnemyObject> mapEnemies = new List<EnemyObject>();
         List<MapObject> mapPlatforms = new List<MapObject>();
 
         Texture2D cursor;
@@ -114,7 +115,7 @@ namespace TestGame
 
             // Add enemies to list
             foreach (Map.Enemy e in map.enemies)
-                mapEnemies.Add(new GameObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed));
+                mapEnemies.Add(new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed));
 
             // Add map objects to list
             foreach (Map.Platform e in map.platforms)
@@ -156,6 +157,9 @@ namespace TestGame
 
             // Load font
             spriteFont = Content.Load<SpriteFont>("Font/Stanberry");
+
+            // Load background
+            background = Content.Load<Texture2D>("Texture/Map/Background/Background");
 
             // Load player textures
             playerTexture = Content.Load<Texture2D>("Texture/Player/Sprites");
@@ -334,16 +338,17 @@ namespace TestGame
                 player.sprites[player.state].rect.X = player.sprites[player.state].rect.Width * player.frame;
             }
 
-            // Update game items animation            
+            // Update game items animation
             foreach (GameObject i in mapItems)
             {
-                i.Update(gameTime.ElapsedGameTime.Milliseconds);
+                i.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
             }
 
-            // Update game enemies animation            
-            foreach (GameObject e in mapEnemies)
+            // Update game enemies animation / state
+            foreach (EnemyObject e in mapEnemies)
             {
-                e.Update(gameTime.ElapsedGameTime.Milliseconds);
+                e.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
+                e.UpdatePosition(gravity);
             }
 
             if(elapsedTime >= gameSpeed)
@@ -367,6 +372,9 @@ namespace TestGame
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation((int)(-player.pos.X + (width / 2)), (int)(-player.pos.Y + player.sprites[player.state].rect.Height + (height / 2)), 0.0f));
             spriteBatch.DrawString(spriteFont, str, new Vector2(400.0f, 0.0f), Color.White);
 
+            // Draw background
+            spriteBatch.Draw(background, Vector2.Zero, Color.White);
+
             // Draw platforms
             foreach (MapObject e in mapPlatforms)
             {
@@ -387,7 +395,6 @@ namespace TestGame
                 e.sprite.rect.X = enemySprites[e.sprite.id].rect.Width * e.frame;
                 if (e.alive)
                     spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha);
-                str = e.speed.ToString();
             }
 
             spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Left) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);

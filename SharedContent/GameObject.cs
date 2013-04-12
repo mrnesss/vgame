@@ -20,7 +20,6 @@ namespace SharedContent
         public int updateTime;
         [ContentSerializerIgnore]
         public float alpha;
-        public float speed;
         [ContentSerializerIgnore]
         public bool collision;
         [ContentSerializerIgnore]
@@ -44,12 +43,6 @@ namespace SharedContent
             collision = false;
             prevCollision = false;
             alive = true;
-            speed = 0;
-        }
-
-        public GameObject(Sprite sprite, Vector2 pos, int updateTime, float speed) : this(sprite, pos, updateTime)
-        {
-            this.speed = speed;
         }
 
         public void UpdateCollision()
@@ -64,7 +57,7 @@ namespace SharedContent
             else return false;
         }
 
-        public void Update(int time)
+        public void UpdateAnimation(int time)
         {
             ellapsedTime += time;
             if (ellapsedTime >= updateTime)
@@ -72,7 +65,6 @@ namespace SharedContent
                 frame = (frame + 1) % sprite.frames;
                 ellapsedTime = 0;
             }
-            pos.X += speed;
         }
     }
 }
