@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <Asset Type="SharedContent.Map">
+    <platforms>
+      <Item>
+        <type>Platform</type>
+        <pos>0 470</pos>
+      </Item>
+      <Item>
+        <type>Platform</type>
+        <pos>200 470</pos>
+      </Item>
+      <Item>
+        <type>Platform</type>
+        <pos>400 470</pos>
+      </Item>
+      <Item>
+        <type>Platform</type>
+        <pos>600 470</pos>
+      </Item>
+      <Item>
+        <type>Platform</type>
+        <pos>800 470</pos>
+      </Item>
+      <Item>
+        <type>Platform</type>
+        <pos>1000 470</pos>
+      </Item>
+      <Item>
+        <type>Platform</type>
+        <pos>1200 470</pos>
+      </Item>
+      <Item>
+        <type>Platform</type>
+        <pos>1400 470</pos>
+      </Item>
+      <Item>
+        <type>Platform</type>
+        <pos>600 400</pos>
+      </Item>
+    </platforms>
+    <items>
+      <Item>
+        <type>StarCoin</type>
+        <pos>10 400</pos>
+      </Item>
+      <Item>
+        <type>GoldCoin</type>
+        <pos>100 350</pos>
+      </Item>
+      <Item>
+        <type>GoldCoin</type>
+        <pos>120 200</pos>
+      </Item>
+    </items>
+    <enemies>
+      <Item>
+        <type>Mouse</type>
+        <pos>120 240</pos>
+      </Item>
+    </enemies>
+    <collectibles>
+      <Item>
+        <Key>StarCoin</Key>
+        <Value>1</Value>
+      </Item>
+      <Item>
+        <Key>GoldCoin</Key>
+        <Value>2</Value>
+      </Item>
+    </collectibles>
+  </Asset>
+</XnaContent>

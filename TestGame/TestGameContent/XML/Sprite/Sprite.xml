@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <Asset Type="SharedContent.SpriteInfo">
+    <collectibles>
+      <Item>
+        <Key>StarCoin</Key>
+        <Value>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
+        </Value>
+      </Item>
+      <Item>
+        <Key>GoldCoin</Key>
+        <Value>
+          <frames>8</frames>
+          <updateTime>100</updateTime>
+        </Value>
+      </Item>
+      <Item>
+        <Key>Test</Key>
+        <Value>
+          <frames>8</frames>
+          <updateTime>75</updateTime>
+        </Value>
+      </Item>
+    </collectibles>
+    <enemies>
+      <Item>
+        <Key>Mouse</Key>
+        <Value>
+          <frames>4</frames>
+          <updateTime>125</updateTime>
+        </Value>
+      </Item>
+    </enemies>
+  </Asset>
+</XnaContent>
+
