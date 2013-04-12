@@ -133,11 +133,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="XML\Sprite\Sprite.xml">
-      <Name>Sprite</Name>
+    <Compile Include="XML\Object\Object.xml">
+      <Name>Object</Name>
       <Importer>XmlImporter</Importer>
       <Processor>PassThroughProcessor</Processor>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="XML\Sprite\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 

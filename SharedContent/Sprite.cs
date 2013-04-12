@@ -19,7 +19,6 @@ namespace SharedContent
         public Rectangle rect;
         [ContentSerializerIgnore]
         public Vector2 origin;
-        public int updateTime;
         [ContentSerializerIgnore]
         public Color[][] textureData;
 
@@ -28,14 +27,13 @@ namespace SharedContent
             
         }
 
-        public Sprite(Enum id, Texture2D texture, int frames, Rectangle rect, Vector2 origin, int updateTime)
+        public Sprite(Enum id, Texture2D texture, int frames, Rectangle rect, Vector2 origin)
         {
             this.id = id;
             this.texture = texture;
             this.frames = frames;
             this.rect = rect;
             this.origin = origin;
-            this.updateTime = updateTime;
             textureData = new Color[frames][];
         }
 

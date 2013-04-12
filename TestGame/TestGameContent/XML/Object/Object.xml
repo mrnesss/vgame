@@ -1,12 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <XnaContent>
-  <Asset Type="SharedContent.SpriteInfo">
+  <Asset Type="SharedContent.ObjectInfo">
     <collectibles>
       <Item>
         <Key>StarCoin</Key>
         <Value>
           <frames>1</frames>
           <updateTime>0</updateTime>
+          <speed>0</speed>
         </Value>
       </Item>
       <Item>
@@ -14,6 +15,7 @@
         <Value>
           <frames>8</frames>
           <updateTime>100</updateTime>
+          <speed>0</speed>
         </Value>
       </Item>
       <Item>
@@ -21,6 +23,7 @@
         <Value>
           <frames>8</frames>
           <updateTime>75</updateTime>
+          <speed>0</speed>
         </Value>
       </Item>
     </collectibles>
@@ -30,6 +33,7 @@
         <Value>
           <frames>4</frames>
           <updateTime>125</updateTime>
+          <speed>4.0</speed>
         </Value>
       </Item>
     </enemies>

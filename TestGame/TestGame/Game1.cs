@@ -22,10 +22,10 @@ namespace TestGame
         SpriteBatch spriteBatch;
         SpriteFont spriteFont;
         KeyboardState kbs;
-        String str;
+        String str = "";
         Viewport viewport;
         Map map;
-        SpriteInfo itemInfo;
+        ObjectInfo objectInfo;
 
         Player player;
         bool pause = false;
@@ -93,28 +93,28 @@ namespace TestGame
             foreach (String e in map.GetItemTypes())
             {
                 CollectibleEnum i = (CollectibleEnum)Enum.Parse(typeof(CollectibleEnum), e);
-                Rectangle rect = new Rectangle(0, 0, collectibleTextures[i].Width / itemInfo.collectibles[i].frames, collectibleTextures[i].Height);
-                itemSprites.Add(i, new Sprite(i, collectibleTextures[i], itemInfo.collectibles[i].frames, rect, Vector2.Zero, itemInfo.collectibles[i].updateTime));
+                Rectangle rect = new Rectangle(0, 0, collectibleTextures[i].Width / objectInfo.collectibles[i].sprite.frames, collectibleTextures[i].Height);
+                itemSprites.Add(i, new Sprite(i, collectibleTextures[i], objectInfo.collectibles[i].sprite.frames, rect, Vector2.Zero));
             }
 
             // Add enemy sprites to dictionary
             foreach (String e in map.GetEnemyTypes())
             {
                 EnemyEnum i = (EnemyEnum)Enum.Parse(typeof(EnemyEnum), e);
-                Rectangle rect = new Rectangle(0, 0, enemyTextures[i].Width / itemInfo.enemies[i].frames, enemyTextures[i].Height);
-                enemySprites.Add(i, new Sprite(i, enemyTextures[i], itemInfo.enemies[i].frames, rect, Vector2.Zero, itemInfo.enemies[i].updateTime));
+                Rectangle rect = new Rectangle(0, 0, enemyTextures[i].Width / objectInfo.enemies[i].sprite.frames, enemyTextures[i].Height);
+                enemySprites.Add(i, new Sprite(i, enemyTextures[i], objectInfo.enemies[i].sprite.frames, rect, Vector2.Zero));
             }
 
             // Add map sprites to list
-            mapSprites.Add(MapEnum.Platform, new Sprite(MapEnum.Platform, mapTextures[MapEnum.Platform], 1, mapTextures[MapEnum.Platform].Bounds, Vector2.Zero, 0));
+            mapSprites.Add(MapEnum.Platform, new Sprite(MapEnum.Platform, mapTextures[MapEnum.Platform], 1, mapTextures[MapEnum.Platform].Bounds, Vector2.Zero));
 
             // Add items to list
             foreach (Map.Item e in map.items)
-                mapItems.Add(new GameObject(itemSprites[e.type], e.pos, itemSprites[e.type].updateTime));
+                mapItems.Add(new GameObject(itemSprites[e.type], e.pos, objectInfo.collectibles[e.type].updateTime));
 
             // Add enemies to list
             foreach (Map.Enemy e in map.enemies)
-                mapEnemies.Add(new GameObject(enemySprites[e.type], e.pos, enemySprites[e.type].updateTime));
+                mapEnemies.Add(new GameObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed));
 
             // Add map objects to list
             foreach (Map.Platform e in map.platforms)
@@ -149,7 +149,7 @@ namespace TestGame
 
             // Load XML info
             map = Content.Load<Map>("XML/Map/Map1");
-            itemInfo = Content.Load<SpriteInfo>("XML/Sprite/Sprite");
+            objectInfo = Content.Load<ObjectInfo>("XML/Object/Object");
 
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -365,7 +365,7 @@ namespace TestGame
             // TODO: Add your drawing code here
             time = String.Format((gameTime.TotalGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", gameTime.TotalGameTime);
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation((int)(-player.pos.X + (width / 2)), (int)(-player.pos.Y + player.sprites[player.state].rect.Height + (height / 2)), 0.0f));
-            spriteBatch.DrawString(spriteFont, Mouse.GetState().ToString(), new Vector2(400.0f, 0.0f), Color.White);
+            spriteBatch.DrawString(spriteFont, str, new Vector2(400.0f, 0.0f), Color.White);
 
             // Draw platforms
             foreach (MapObject e in mapPlatforms)
@@ -387,6 +387,7 @@ namespace TestGame
                 e.sprite.rect.X = enemySprites[e.sprite.id].rect.Width * e.frame;
                 if (e.alive)
                     spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha);
+                str = e.speed.ToString();
             }
 
             spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Left) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);

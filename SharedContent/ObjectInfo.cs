@@ -6,9 +6,9 @@ using Microsoft.Xna.Framework;
 
 namespace SharedContent
 {
-    public class SpriteInfo
+    public class ObjectInfo
     {
-        public Dictionary<CollectibleEnum, Sprite> collectibles;
-        public Dictionary<EnemyEnum, Sprite> enemies;
+        public Dictionary<CollectibleEnum, GameObject> collectibles;
+        public Dictionary<EnemyEnum, GameObject> enemies;
     }
 }

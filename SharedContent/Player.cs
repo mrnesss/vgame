@@ -18,7 +18,7 @@ namespace SharedContent
         public int frame;
         public float jump;
         public Vector2 jumpVel;
-        public float maxSpeed;
+        public float speed;
         public Vector2 acceleration;
         public Vector2 velocity;
         public bool isJumping;
@@ -37,7 +37,7 @@ namespace SharedContent
             this.dir = dir;
             this.jump = jump;
             jumpVel = new Vector2(0, jump);
-            maxSpeed = speed;
+            this.speed = speed;
             this.acceleration = acceleration;
             velocity = Vector2.Zero;
             isJumping = false;
@@ -78,8 +78,8 @@ namespace SharedContent
 
         public void UpdateVelocity(Vector2 a) {
             velocity = Vector2.Add(velocity, a);
-            if (velocity.Length() > maxSpeed)
-                velocity = Vector2.Normalize(velocity) * maxSpeed;
+            if (velocity.Length() > speed)
+                velocity = Vector2.Normalize(velocity) * speed;
         }
 
         public Vector2 GetVelocity()
