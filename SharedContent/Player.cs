@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace SharedContent
 {
-    public class Player
+    public class Player : ICollisionable
     {
         public PlayerSpriteEnum state;
         public PlayerSpriteEnum prevState;

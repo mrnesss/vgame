@@ -233,7 +233,8 @@ namespace TestGame
             //IsFixedTimeStep = true;
 
             // Check collisions
-            CheckCollision();
+            CheckPlayerCollisions();
+            CheckEnemiesCollisions();
 
             // Check/Update keyboard state
             kbs = Keyboard.GetState();
@@ -348,7 +349,7 @@ namespace TestGame
             foreach (EnemyObject e in mapEnemies)
             {
                 e.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
-                e.UpdatePosition(gravity);
+                e.UpdatePosition(gravity, player.pos);
             }
 
             if(elapsedTime >= gameSpeed)
@@ -426,7 +427,7 @@ namespace TestGame
             spriteBatch.End();
         }
 
-        void CheckCollision()
+        void CheckPlayerCollisions()
         {
             Rectangle playerRect = new Rectangle((int)(player.pos.X - player.sprites[player.state].origin.X), (int)(player.pos.Y - player.sprites[player.state].origin.Y), player.sprites[player.state].rect.Width, player.sprites[player.state].rect.Height);
             
@@ -470,6 +471,24 @@ namespace TestGame
                         player.pos.Y = objectRect.Bottom;
                         player.ResetJump();
                         break;
+                    }
+                }
+            }
+        }
+
+        void CheckEnemiesCollisions()
+        {
+            // Collision with map platforms
+            foreach (EnemyObject e in mapEnemies)
+            {
+                e.isFalling = true;
+                if (e.pos.Y - e.prevPos.Y >= 0)
+                {
+                    foreach (MapObject m in mapPlatforms)
+                    {
+                        Rectangle objectRect = new Rectangle((int)m.pos.X, (int)m.pos.Y, m.sprite.rect.Width, 1);
+                        if (e.Collided(objectRect))
+                            e.isFalling = false;
                     }
                 }
             }
