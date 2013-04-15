@@ -99,6 +99,7 @@
     <Compile Include="CollectibleEnum.cs" />
     <Compile Include="EnemyEnum.cs" />
     <Compile Include="ICollisionable.cs" />
+    <Compile Include="LevelMenu.cs" />
     <Compile Include="ObjectInfo.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MapEnum.cs" />

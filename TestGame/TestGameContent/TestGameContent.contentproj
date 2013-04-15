@@ -145,7 +145,21 @@
     <Folder Include="XML\Sprite\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Map\Background\Background.png">
+    <Compile Include="Texture\Menu\Background\Background.png">
+      <Name>Background</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="XML\Menu\Level_Selection.xml">
+      <Name>Level_Selection</Name>
+      <Importer>XmlImporter</Importer>
+      <Processor>PassThroughProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Map\Background\Background.jpg">
       <Name>Background</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>

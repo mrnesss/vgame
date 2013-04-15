@@ -19,17 +19,20 @@ namespace TestGame
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
+        TimeSpan elapsedGameTime;
         SpriteBatch spriteBatch;
         SpriteFont spriteFont;
-        KeyboardState kbs;
-        String str = "";
+        KeyboardState kbs, pKbs;
+        String str = "hurr";
         Viewport viewport;
         Map map;
         ObjectInfo objectInfo;
         Texture2D background;
+        LevelMenu levelMenu;
 
         Player player;
         bool pause = false;
+        bool playing = false;
 
         Texture2D playerTexture;
         int gameSpeed = 100;
@@ -197,6 +200,10 @@ namespace TestGame
                     enemyTextures.Add((EnemyEnum)Enum.Parse(typeof(EnemyEnum), filename), Content.Load<Texture2D>(path + filename));
             }
 
+            // Load level selection menu
+            levelMenu = Content.Load<LevelMenu>("XML/Menu/Level_Selection");
+            levelMenu.background = Content.Load<Texture2D>("Texture/Menu/Background/" + levelMenu.bg);
+
             cursor = Content.Load<Texture2D>("Texture/cursor");
         }
 
@@ -216,64 +223,22 @@ namespace TestGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            CheckKeyboardState();
 
-            if (Mouse.GetState().RightButton == ButtonState.Pressed)
-                pause = true;
-            if (Mouse.GetState().MiddleButton == ButtonState.Pressed)
-                pause = false;
-
-            if(!pause){
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            // TODO: Add your update logic here
-
+            if(!pause){
             //TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 250);
             //IsFixedTimeStep = true;
+
+            elapsedGameTime += gameTime.ElapsedGameTime;
+            time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", elapsedGameTime);
 
             // Check collisions
             CheckPlayerCollisions();
             CheckEnemiesCollisions();
-
-            // Check/Update keyboard state
-            kbs = Keyboard.GetState();
-            foreach(Keys key in kbs.GetPressedKeys())
-            {
-                switch (key)
-                {
-                    case Keys.Left:
-                    case Keys.A:
-                        if (player.dir == Direction.Right)
-                            player.UpdateVelocity(-(player.acceleration + friction));
-                        else
-                            player.UpdateVelocity(-player.acceleration);
-                        break;
-                    case Keys.Right:
-                    case Keys.D:
-                        if (player.dir == Direction.Left)
-                            player.UpdateVelocity(player.acceleration + friction);
-                        else
-                            player.UpdateVelocity(player.acceleration);
-                        break;
-                    case Keys.Up:
-                    case Keys.W:
-                        if (!player.isJumping && player.canJump)
-                        {
-                            player.isJumping = true;
-                            player.canJump = false;
-                        }
-                        break;
-                    case Keys.Down:
-                    case Keys.S:
-                        str = "Down";
-                        break;
-                    case Keys.Space:
-                        player.pos.X = Mouse.GetState().X;
-                        player.pos.Y = Mouse.GetState().Y;
-                        break;
-                }
-            }
 
             // Update position
             player.prevPos = player.pos;
@@ -303,17 +268,19 @@ namespace TestGame
             player.pos = Vector2.Add(player.GetVelocity(), player.pos);
 
             // Update gravity
-            if (player.isJumping)
+            if (playing)
             {
-                player.pos = Vector2.Subtract(player.pos, player.GetJump());
-                player.UpdateJump(gravity);
+                if (player.isJumping)
+                {
+                    player.pos = Vector2.Subtract(player.pos, player.GetJump());
+                    player.UpdateJump(gravity);
+                }
+
+                if (player.isFalling)
+                {
+                    player.pos = Vector2.Add(gravity, player.pos);
+                }
             }
-
-            if (player.isFalling)
-            {
-                player.pos = Vector2.Add(gravity, player.pos);
-            }           
-
             // Update animation
             player.UpdateDirection();
             if (player.pos != player.prevPos)
@@ -360,6 +327,69 @@ namespace TestGame
         }
         }
 
+        void CheckKeyboardState()
+        {
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.P) && !kbs.GetPressedKeys().Contains(Keys.P))
+                pause ^= true;
+            kbs = Keyboard.GetState();
+
+            foreach (Keys key in kbs.GetPressedKeys())
+            {
+                if (playing)
+                {
+                    switch (key)
+                    {
+                        case Keys.Left:
+                        case Keys.A:
+                            if (player.dir == Direction.Right)
+                                player.UpdateVelocity(-(player.acceleration + friction));
+                            else
+                                player.UpdateVelocity(-player.acceleration);
+                            break;
+                        case Keys.Right:
+                        case Keys.D:
+                            if (player.dir == Direction.Left)
+                                player.UpdateVelocity(player.acceleration + friction);
+                            else
+                                player.UpdateVelocity(player.acceleration);
+                            break;
+                        case Keys.Up:
+                        case Keys.W:
+                            if (!player.isJumping && player.canJump)
+                            {
+                                player.isJumping = true;
+                                player.canJump = false;
+                            }
+                            break;
+                        case Keys.Down:
+                        case Keys.S:
+                            str = "Down";
+                            break;
+                        case Keys.Space:
+                            player.pos.X = Mouse.GetState().X;
+                            player.pos.Y = Mouse.GetState().Y;
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (key)
+                    {
+                        case Keys.Left:
+                        case Keys.A:
+                            player.pos = Vector2.Lerp(levelMenu.levelPos[1], levelMenu.levelPos[0], 0.01f);
+                            break;
+                        case Keys.Right:
+                        case Keys.D:
+                            player.pos = Vector2.Lerp(levelMenu.levelPos[0], levelMenu.levelPos[1], 0.01f);
+                            break;
+                        case Keys.Enter:
+                            break;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -368,10 +398,35 @@ namespace TestGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
-            time = String.Format((gameTime.TotalGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", gameTime.TotalGameTime);
+            if (!playing)
+            {
+                DrawLevelSelection();
+            }
+            else
+            {
+                DrawPlayingScreen();
+                DrawHUD();
+            }
+
+            // Draw cursor
+            spriteBatch.Begin();
+            spriteBatch.Draw(cursor, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
+            spriteBatch.End();
+
+            base.Draw(gameTime);
+        }
+
+        void DrawLevelSelection()
+        {
+            spriteBatch.Begin();
+            spriteBatch.Draw(levelMenu.background, Vector2.Zero, Color.White);
+            spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Left) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            spriteBatch.End();
+        }
+
+        void DrawPlayingScreen()
+        {
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation((int)(-player.pos.X + (width / 2)), (int)(-player.pos.Y + player.sprites[player.state].rect.Height + (height / 2)), 0.0f));
-            spriteBatch.DrawString(spriteFont, str, new Vector2(400.0f, 0.0f), Color.White);
 
             // Draw background
             spriteBatch.Draw(background, Vector2.Zero, Color.White);
@@ -386,7 +441,7 @@ namespace TestGame
             foreach (GameObject e in mapItems)
             {
                 e.sprite.rect.X = itemSprites[e.sprite.id].rect.Width * e.frame;
-                if(e.alive)
+                if (e.alive)
                     spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha);
             }
 
@@ -400,9 +455,6 @@ namespace TestGame
 
             spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Left) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             spriteBatch.End();
-            DrawHUD();
-
-            base.Draw(gameTime);
         }
 
         void DrawHUD()
@@ -411,6 +463,7 @@ namespace TestGame
             float scale = 1.0f;
             spriteBatch.Begin();
             spriteBatch.DrawString(spriteFont, time, new Vector2(0.0f, 0.0f), Color.White);
+            spriteBatch.DrawString(spriteFont, elapsedGameTime.ToString(), new Vector2(100.0f, 100.0f), Color.White);
             foreach (KeyValuePair<Enum, Sprite> i in itemSprites)
             {
                 string counter = itemCounter[(CollectibleEnum)i.Value.id].ToString();
@@ -423,7 +476,6 @@ namespace TestGame
                 spriteBatch.DrawString(spriteFont, counter, new Vector2(x - spriteFont.MeasureString(counter).X + i.Value.rect.Width * scale, position.Y), Color.White);
                 x += (int)Math.Ceiling(i.Value.rect.Width * scale);
             }
-            spriteBatch.Draw(cursor, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
             spriteBatch.End();
         }
 

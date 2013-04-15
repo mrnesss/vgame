@@ -9,6 +9,8 @@ Content\Font\Vanilla.xnb
 Content\Font\Stanberry.xnb
 Content\Texture\Collectible\Item\Test.xnb
 Content\Texture\Enemy\Mouse.xnb
+Content\Texture\Menu\Background\Background.xnb
 Content\Texture\Map\Background\Background.xnb
 Content\XML\Map\Map1.xnb
 Content\XML\Object\Object.xnb
+Content\XML\Menu\Level_Selection.xnb

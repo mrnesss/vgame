@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <Asset Type="SharedContent.LevelMenu">
+    <bg>Background</bg>
+    <levels>3</levels>
+    <levelPos>120 400 160 400 200 400</levelPos>
+  </Asset>
+</XnaContent>
+
