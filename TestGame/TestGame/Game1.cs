@@ -223,7 +223,9 @@ namespace TestGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            CheckKeyboardState();
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.P) && !kbs.GetPressedKeys().Contains(Keys.P))
+                pause ^= true;
+            kbs = Keyboard.GetState();
 
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
@@ -239,6 +241,9 @@ namespace TestGame
             // Check collisions
             CheckPlayerCollisions();
             CheckEnemiesCollisions();
+
+            // Check pressed keys
+            CheckKeyboardState();
 
             // Update position
             player.prevPos = player.pos;
@@ -329,10 +334,6 @@ namespace TestGame
 
         void CheckKeyboardState()
         {
-            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.P) && !kbs.GetPressedKeys().Contains(Keys.P))
-                pause ^= true;
-            kbs = Keyboard.GetState();
-
             foreach (Keys key in kbs.GetPressedKeys())
             {
                 if (playing)
@@ -377,7 +378,11 @@ namespace TestGame
                     {
                         case Keys.Left:
                         case Keys.A:
-                            player.pos = Vector2.Lerp(levelMenu.levelPos[1], levelMenu.levelPos[0], 0.01f);
+                            if(player.pos != levelMenu.levelPos[0]) {
+                                if (player.pos.X > levelMenu.levelPos[0].X)
+                                    player.pos = Vector2.Subtract(player.pos, new Vector2(player.speed, 0));
+                            }
+                            //player.pos = Vector2.Lerp(levelMenu.levelPos[1], levelMenu.levelPos[0], 0.01f);
                             break;
                         case Keys.Right:
                         case Keys.D:
@@ -463,7 +468,7 @@ namespace TestGame
             float scale = 1.0f;
             spriteBatch.Begin();
             spriteBatch.DrawString(spriteFont, time, new Vector2(0.0f, 0.0f), Color.White);
-            spriteBatch.DrawString(spriteFont, elapsedGameTime.ToString(), new Vector2(100.0f, 100.0f), Color.White);
+            spriteBatch.DrawString(spriteFont, str, new Vector2(100.0f, 100.0f), Color.White);
             foreach (KeyValuePair<Enum, Sprite> i in itemSprites)
             {
                 string counter = itemCounter[(CollectibleEnum)i.Value.id].ToString();
