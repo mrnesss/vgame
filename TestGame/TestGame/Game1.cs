@@ -22,7 +22,7 @@ namespace TestGame
         TimeSpan elapsedGameTime;
         SpriteBatch spriteBatch;
         SpriteFont spriteFont;
-        KeyboardState kbs, pKbs;
+        KeyboardState kbs, pkbs;
         String str = "hurr";
         Viewport viewport;
         Map map;
@@ -246,70 +246,10 @@ namespace TestGame
             CheckKeyboardState();
 
             // Update position
-            player.prevPos = player.pos;
+            UpdatePlayerPosition();
 
-            if (!(kbs.IsKeyDown(Keys.Left) || kbs.IsKeyDown(Keys.Right) || kbs.IsKeyDown(Keys.A) || kbs.IsKeyDown(Keys.D)))
-            {
-                if (player.dir == Direction.Left)
-                {
-                    if(player.state == PlayerSpriteEnum.Jumping)
-                        player.UpdateVelocity(Vector2.Divide(friction, 2));
-                    else
-                        player.UpdateVelocity(friction);
-                    if (player.velocity.X > 0)
-                        player.velocity.X = 0;
-                }
-                else
-                {
-                    if (player.state == PlayerSpriteEnum.Jumping)
-                        player.UpdateVelocity(Vector2.Divide(-friction, 2));
-                    else
-                        player.UpdateVelocity(-friction);
-                    if (player.velocity.X < 0)
-                        player.velocity.X = 0;
-                }
-            }
-
-            player.pos = Vector2.Add(player.GetVelocity(), player.pos);
-
-            // Update gravity
-            if (playing)
-            {
-                if (player.isJumping)
-                {
-                    player.pos = Vector2.Subtract(player.pos, player.GetJump());
-                    player.UpdateJump(gravity);
-                }
-
-                if (player.isFalling)
-                {
-                    player.pos = Vector2.Add(gravity, player.pos);
-                }
-            }
             // Update animation
-            player.UpdateDirection();
-            if (player.pos != player.prevPos)
-            {
-                if (player.pos.Y != player.prevPos.Y)
-                    player.state = PlayerSpriteEnum.Jumping;
-                else if (player.pos.X != player.prevPos.X && !player.isJumping)
-                    player.state = PlayerSpriteEnum.Walking;
-            }
-            else if(!(kbs.IsKeyDown(Keys.Left) || kbs.IsKeyDown(Keys.Right)) && !player.isJumping)
-            {
-                player.state = PlayerSpriteEnum.Standing;
-            }
-            if (player.state != player.prevState)
-            {
-                player.frame = 0;
-                player.prevState = player.state;
-            }
-
-            if (elapsedTime >= gameSpeed)
-            {
-                player.frame = (player.frame + 1) % player.sprites[player.state].frames;
-                player.sprites[player.state].rect.X = player.sprites[player.state].rect.Width * player.frame;
-            }
+            UpdatePlayerAnimation();
 
             // Update game items animation
             foreach (GameObject i in mapItems)
@@ -325,7 +265,7 @@ namespace TestGame
             }
 
             if(elapsedTime >= gameSpeed)
-                elapsedTime = 0;      
+                elapsedTime = 0;
             elapsedTime += gameTime.ElapsedGameTime.Milliseconds;
             
             base.Update(gameTime);
@@ -372,27 +312,12 @@ namespace TestGame
                             break;
                     }
                 }
-                else
-                {
-                    switch (key)
-                    {
-                        case Keys.Left:
-                        case Keys.A:
-                            if(player.pos != levelMenu.levelPos[0]) {
-                                if (player.pos.X > levelMenu.levelPos[0].X)
-                                    player.pos = Vector2.Subtract(player.pos, new Vector2(player.speed, 0));
-                            }
-                            //player.pos = Vector2.Lerp(levelMenu.levelPos[1], levelMenu.levelPos[0], 0.01f);
-                            break;
-                        case Keys.Right:
-                        case Keys.D:
-                            player.pos = Vector2.Lerp(levelMenu.levelPos[0], levelMenu.levelPos[1], 0.01f);
-                            break;
-                        case Keys.Enter:
-                            break;
-                    }
-                }
             }
+            if (kbs.GetPressedKeys().Contains(Keys.A) && !pkbs.GetPressedKeys().Contains(Keys.A))
+                player.ChangeLevel(-1, levelMenu.levels);
+            else if (kbs.GetPressedKeys().Contains(Keys.D) && !pkbs.GetPressedKeys().Contains(Keys.D))
+                player.ChangeLevel(1, levelMenu.levels);
+            pkbs = kbs;
         }
 
         /// <summary>
@@ -426,6 +351,7 @@ namespace TestGame
             spriteBatch.Begin();
             spriteBatch.Draw(levelMenu.background, Vector2.Zero, Color.White);
             spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Left) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            spriteBatch.DrawString(spriteFont, str, new Vector2(100.0f, 100.0f), Color.White);
             spriteBatch.End();
         }
 
@@ -468,7 +394,6 @@ namespace TestGame
             float scale = 1.0f;
             spriteBatch.Begin();
             spriteBatch.DrawString(spriteFont, time, new Vector2(0.0f, 0.0f), Color.White);
-            spriteBatch.DrawString(spriteFont, str, new Vector2(100.0f, 100.0f), Color.White);
             foreach (KeyValuePair<Enum, Sprite> i in itemSprites)
             {
                 string counter = itemCounter[(CollectibleEnum)i.Value.id].ToString();
@@ -482,6 +407,93 @@ namespace TestGame
                 x += (int)Math.Ceiling(i.Value.rect.Width * scale);
             }
             spriteBatch.End();
+        }
+
+        void UpdatePlayerPosition()
+        {
+            player.prevPos = player.pos;
+
+            if (playing)
+            {
+                if (!(kbs.IsKeyDown(Keys.Left) || kbs.IsKeyDown(Keys.Right) || kbs.IsKeyDown(Keys.A) || kbs.IsKeyDown(Keys.D)))
+                {
+                    if (player.dir == Direction.Left)
+                    {
+                        if (player.state == PlayerSpriteEnum.Jumping)
+                            player.UpdateVelocity(Vector2.Divide(friction, 2));
+                        else
+                            player.UpdateVelocity(friction);
+                        if (player.velocity.X > 0)
+                            player.velocity.X = 0;
+                    }
+                    else
+                    {
+                        if (player.state == PlayerSpriteEnum.Jumping)
+                            player.UpdateVelocity(Vector2.Divide(-friction, 2));
+                        else
+                            player.UpdateVelocity(-friction);
+                        if (player.velocity.X < 0)
+                            player.velocity.X = 0;
+                    }
+                }
+
+                // Update gravity
+                if (player.isJumping)
+                {
+                    player.pos = Vector2.Subtract(player.pos, player.GetJump());
+                    player.UpdateJump(gravity);
+                }
+
+                if (player.isFalling)
+                {
+                    player.pos = Vector2.Add(gravity, player.pos);
+                }
+            }
+            else
+            {
+                if (player.pos.X > levelMenu.levelPos[player.GetLevel()].X)
+                    player.UpdateVelocity(new Vector2(-player.speed, 0.0f));
+                else if (player.pos.X < levelMenu.levelPos[player.GetLevel()].X)
+                    player.UpdateVelocity(new Vector2(player.speed, 0.0f));
+                if (player.dir == Direction.Left)
+                {
+                    if (player.pos.X < levelMenu.levelPos[player.GetLevel()].X)
+                        player.pos.X = levelMenu.levelPos[player.GetLevel()].X;
+                }
+                else
+                {
+                    if (player.pos.X > levelMenu.levelPos[player.GetLevel()].X)
+                        player.pos.X = levelMenu.levelPos[player.GetLevel()].X;
+                }
+            }
+            player.pos = Vector2.Add(player.GetVelocity(), player.pos);
+        }
+
+        void UpdatePlayerAnimation()
+        {
+            player.UpdateDirection();
+            if (player.pos != player.prevPos)
+            {
+                if (player.pos.Y != player.prevPos.Y)
+                    player.state = PlayerSpriteEnum.Jumping;
+                else if (player.pos.X != player.prevPos.X && !player.isJumping)
+                    player.state = PlayerSpriteEnum.Walking;
+            }
+            else if(!player.isJumping)
+            {
+                player.state = PlayerSpriteEnum.Standing;
+            }
+            if (player.state != player.prevState)
+            {
+                player.frame = 0;
+                player.prevState = player.state;
+            }
+
+            if (elapsedTime >= gameSpeed)
+            {
+                player.frame = (player.frame + 1) % player.sprites[player.state].frames;
+                player.sprites[player.state].rect.X = player.sprites[player.state].rect.Width * player.frame;
+            }
         }
 
         void CheckPlayerCollisions()

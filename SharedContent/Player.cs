@@ -16,6 +16,7 @@ namespace SharedContent
         public Vector2 prevPos;
         public Direction dir;
         public int frame;
+        public int level;
         public float jump;
         public Vector2 jumpVel;
         public float speed;
@@ -44,6 +45,7 @@ namespace SharedContent
             isFalling = true;
             canJump = false;
             frame = 0;
+            level = 0;
         }
 
         public void AddSprite(PlayerSpriteEnum id, PlayerSprite sprite)
@@ -96,6 +98,20 @@ namespace SharedContent
                 return true;
             else
                 return false;
+        }
+
+        public void ChangeLevel(int change, int maxLevel)
+        {
+            level += change;
+            if (level < 0)
+                level = 0;
+            else if (level >= maxLevel)
+                level = maxLevel - 1;
+        }
+
+        public int GetLevel()
+        {
+            return level;
         }
     }
 }
