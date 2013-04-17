@@ -239,8 +239,11 @@ namespace TestGame
             time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", elapsedGameTime);
 
             // Check collisions
-            CheckPlayerCollisions();
-            CheckEnemiesCollisions();
+            if (playing)
+            {
+                CheckPlayerCollisions();
+                CheckEnemiesCollisions();
+            }
 
             // Check pressed keys
             CheckKeyboardState();
@@ -451,20 +454,19 @@ namespace TestGame
             }
             else
             {
-                if (player.pos.X > levelMenu.levelPos[player.GetLevel()].X)
-                    player.UpdateVelocity(new Vector2(-player.speed, 0.0f));
-                else if (player.pos.X < levelMenu.levelPos[player.GetLevel()].X)
-                    player.UpdateVelocity(new Vector2(player.speed, 0.0f));
-                if (player.dir == Direction.Left)
+                Vector2 v1, v2, v3;
+                v1 = new Vector2(levelMenu.positions[player.GetLevel()].X - player.pos.X, levelMenu.positions[player.GetLevel()].Y - player.pos.Y);
+                v2 = v1;
+                v1.Normalize();
+                v1 *= player.speed / 2;
+                v3 = (v1.Length() < v2.Length()) ? v1 : v2;
+                str = v3.ToString();
+                if (player.pos != levelMenu.positions[player.GetLevel()])
                 {
-                    if (player.pos.X < levelMenu.levelPos[player.GetLevel()].X)
-                        player.pos.X = levelMenu.levelPos[player.GetLevel()].X;
+                    player.SetVelocity(v3);
                 }
                 else
-                {
-                    if (player.pos.X > levelMenu.levelPos[player.GetLevel()].X)
-                        player.pos.X = levelMenu.levelPos[player.GetLevel()].X;
-                }
+                    player.SetVelocity(Vector2.Zero);
             }
             player.pos = Vector2.Add(player.GetVelocity(), player.pos);
         }
@@ -474,7 +476,7 @@ namespace TestGame
             player.UpdateDirection();
             if (player.pos != player.prevPos)
             {
-                if (player.pos.Y != player.prevPos.Y)
+                if (player.pos.Y != player.prevPos.Y && playing)
                     player.state = PlayerSpriteEnum.Jumping;
                 else if (player.pos.X != player.prevPos.X && !player.isJumping)
                     player.state = PlayerSpriteEnum.Walking;

@@ -84,6 +84,11 @@ namespace SharedContent
                 velocity = Vector2.Normalize(velocity) * speed;
         }
 
+        public void SetVelocity(Vector2 v)
+        {
+            velocity = v;
+        }
+
         public Vector2 GetVelocity()
         {
             return velocity;

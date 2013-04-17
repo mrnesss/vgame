@@ -14,7 +14,7 @@ namespace SharedContent
         public Texture2D background;
         public String bg;
         public int levels;
-        public Vector2[] levelPos;
+        public Vector2[] positions;
 
         public LevelMenu()
         {
