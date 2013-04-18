@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <Asset Type="SharedContent.StartMenu">
+    <bg>StartMenu</bg>
+    <options>
+      <Item>Start</Item>
+      <Item>Options</Item>
+      <Item>Credits</Item>
+      <Item>About</Item>
+    </options>
+  </Asset>
+</XnaContent>

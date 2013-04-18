@@ -29,10 +29,12 @@ namespace TestGame
         ObjectInfo objectInfo;
         Texture2D background;
         LevelMenu levelMenu;
+        StartMenu startMenu;
 
         Player player;
         bool pause = false;
         bool playing = false;
+        bool started = false;
 
         Texture2D playerTexture;
         int gameSpeed = 100;
@@ -200,6 +202,10 @@ namespace TestGame
                     enemyTextures.Add((EnemyEnum)Enum.Parse(typeof(EnemyEnum), filename), Content.Load<Texture2D>(path + filename));
             }
 
+            // Load start menu
+            startMenu = Content.Load<StartMenu>("XML/Menu/Start_Menu");
+            startMenu.background = Content.Load<Texture2D>("Texture/Menu/Background/" + startMenu.bg);
+
             // Load level selection menu
             levelMenu = Content.Load<LevelMenu>("XML/Menu/Level_Selection");
             levelMenu.background = Content.Load<Texture2D>("Texture/Menu/Background/" + levelMenu.bg);
@@ -258,6 +264,7 @@ namespace TestGame
             foreach (GameObject i in mapItems)
             {
                 i.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
+                i.UpdatePosition();
             }
 
             // Update game enemies animation / state
@@ -277,9 +284,9 @@ namespace TestGame
 
         void CheckKeyboardState()
         {
-            foreach (Keys key in kbs.GetPressedKeys())
+            if (playing)
             {
-                if (playing)
+                foreach (Keys key in kbs.GetPressedKeys())
                 {
                     switch (key)
                     {
@@ -316,10 +323,20 @@ namespace TestGame
                     }
                 }
             }
-            if (kbs.GetPressedKeys().Contains(Keys.A) && !pkbs.GetPressedKeys().Contains(Keys.A))
-                player.ChangeLevel(-1, levelMenu.levels);
-            else if (kbs.GetPressedKeys().Contains(Keys.D) && !pkbs.GetPressedKeys().Contains(Keys.D))
-                player.ChangeLevel(1, levelMenu.levels);
+            else if (!started)
+            {
+                if (kbs.GetPressedKeys().Contains(Keys.W) && !pkbs.GetPressedKeys().Contains(Keys.W))
+                    player.ChangeLevel(-1, levelMenu.levels);
+                else if (kbs.GetPressedKeys().Contains(Keys.S) && !pkbs.GetPressedKeys().Contains(Keys.S))
+                    player.ChangeLevel(1, levelMenu.levels);
+            }
+            else
+            {
+                if (kbs.GetPressedKeys().Contains(Keys.A) && !pkbs.GetPressedKeys().Contains(Keys.A))
+                    player.ChangeLevel(-1, levelMenu.levels);
+                else if (kbs.GetPressedKeys().Contains(Keys.D) && !pkbs.GetPressedKeys().Contains(Keys.D))
+                    player.ChangeLevel(1, levelMenu.levels);
+            }
             pkbs = kbs;
         }
 
@@ -331,7 +348,11 @@ namespace TestGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            if (!playing)
+            if (!started)
+            {
+                DrawStartMenuScreen();
+            }
+            else if (!playing)
             {
                 DrawLevelSelection();
             }
@@ -354,7 +375,6 @@ namespace TestGame
             spriteBatch.Begin();
             spriteBatch.Draw(levelMenu.background, Vector2.Zero, Color.White);
             spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Left) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
-            spriteBatch.DrawString(spriteFont, str, new Vector2(100.0f, 100.0f), Color.White);
             spriteBatch.End();
         }
 
@@ -408,6 +428,22 @@ namespace TestGame
                     spriteBatch.Draw(i.Value.texture, position, i.Value.rect, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
                 spriteBatch.DrawString(spriteFont, counter, new Vector2(x - spriteFont.MeasureString(counter).X + i.Value.rect.Width * scale, position.Y), Color.White);
                 x += (int)Math.Ceiling(i.Value.rect.Width * scale);
+            }
+            spriteBatch.DrawString(spriteFont, str, new Vector2(100.0f, 100.0f), Color.White);
+            spriteBatch.End();
+        }
+
+        void DrawStartMenuScreen()
+        {
+            int d, y;
+            d = (int)((height + hudHeight) * 0.6 / (startMenu.options.GetLength(0) - 1));
+            y = (int)((height + hudHeight) * 0.2);
+            spriteBatch.Begin();
+            spriteBatch.Draw(startMenu.background, Vector2.Zero, Color.White);
+            foreach (String e in startMenu.options)
+            {
+                spriteBatch.DrawString(spriteFont, e, new Vector2(width / 2 - spriteFont.MeasureString(e).X / 2, y - spriteFont.MeasureString(e).Y / 2), Color.White);
+                y += d;
             }
             spriteBatch.End();
         }

@@ -26,6 +26,12 @@ namespace SharedContent
         public bool prevCollision;
         [ContentSerializerIgnore]
         public bool alive;
+        [ContentSerializerIgnore]
+        public float distance;
+        [ContentSerializerIgnore]
+        public float moved;
+        [ContentSerializerIgnore]
+        public bool up;
 
         public GameObject()
         {
@@ -43,6 +49,9 @@ namespace SharedContent
             collision = false;
             prevCollision = false;
             alive = true;
+            distance = 5.0f;
+            moved = 0.0f;
+            up = false;
         }
 
         public void UpdateCollision()
@@ -55,6 +64,23 @@ namespace SharedContent
             if (!prevCollision && collision)
                 return true;
             else return false;
+        }
+
+        public void UpdatePosition()
+        {
+            float step = 25.0f;
+            if (Math.Abs(moved) > distance)
+                up ^= true;
+            if (up)
+            {
+                pos.Y += distance / step;
+                moved += distance / step;
+            }
+            else
+            {
+                pos.Y -= distance / step;
+                moved -= distance / step;
+            }
         }
 
         public void UpdateAnimation(int time)

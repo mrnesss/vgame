@@ -145,8 +145,8 @@
     <Folder Include="XML\Sprite\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Menu\Background\Background.png">
-      <Name>Background</Name>
+    <Compile Include="Texture\Menu\Background\LevelSelect.png">
+      <Name>LevelSelect</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -164,6 +164,20 @@
       <Name>Background</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Menu\Background\StartMenu.jpg">
+      <Name>StartMenu</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="XML\Menu\Start_Menu.xml">
+      <Name>Start_Menu</Name>
+      <Importer>XmlImporter</Importer>
+      <Processor>PassThroughProcessor</Processor>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
