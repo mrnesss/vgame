@@ -27,14 +27,15 @@ namespace TestGame
         Viewport viewport;
         Map map;
         ObjectInfo objectInfo;
-        Texture2D background;
+        Texture2D background, startScreen;
         LevelMenu levelMenu;
         StartMenu startMenu;
 
         Player player;
         bool pause = false;
-        bool playing = false;
-        bool started = false;
+        //bool playing = false;
+        //bool started = false;
+        GameStateEnum gameState;
 
         Texture2D playerTexture;
         int gameSpeed = 100;
@@ -76,8 +77,7 @@ namespace TestGame
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
+            gameState = GameStateEnum.MainMenu;
             viewport = new Viewport(-200, -200, 400, 400);
             kbs = new KeyboardState();
             friction = new Vector2(0.1f, 0.0f);
@@ -116,6 +116,9 @@ namespace TestGame
 
             // Load background
             background = Content.Load<Texture2D>("Texture/Map/Background/Background");
+
+            // Load start screen
+            startScreen = Content.Load<Texture2D>("Texture/Menu/Background/Start_Screen");
 
             // Load player textures
             //playerTexture = Content.Load<Texture2D>("Texture/Player/Sprites");
@@ -164,7 +167,7 @@ namespace TestGame
             time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", elapsedGameTime);
 
             // Check collisions
-            if (playing)
+            if (gameState == GameStateEnum.Playing)
             {
                 CheckPlayerCollisions();
                 CheckEnemiesCollisions();
@@ -295,7 +298,7 @@ namespace TestGame
         void CheckKeyboardState()
         {
             // Game started, currently playing
-            if (playing)
+            if (gameState == GameStateEnum.Playing)
             {
                 foreach (Keys key in kbs.GetPressedKeys())
                 {
@@ -334,8 +337,8 @@ namespace TestGame
                     }
                 }
             }
-            // Game hasn't started, start menu screen
-            else if (!started)
+            // Game hasn't started, main menu screen
+            else if (gameState == GameStateEnum.MainMenu)
             {
                 if ((kbs.GetPressedKeys().Contains(Keys.W) && !pkbs.GetPressedKeys().Contains(Keys.W)) ||
                     (kbs.GetPressedKeys().Contains(Keys.Up) && !pkbs.GetPressedKeys().Contains(Keys.Up)))
@@ -348,14 +351,14 @@ namespace TestGame
                     switch (startMenu.options[startMenu.selectedOption])
                     {
                         case "Start":
-                            started = true;
+                            gameState = GameStateEnum.LevelSelection;
                             break;
                     }
                 }
                     
             }
             // Game started, level selection screen
-            else
+            else if(gameState == GameStateEnum.LevelSelection)
             {
                 if ((kbs.GetPressedKeys().Contains(Keys.A) && !pkbs.GetPressedKeys().Contains(Keys.A)) ||
                     (kbs.GetPressedKeys().Contains(Keys.Left) && !pkbs.GetPressedKeys().Contains(Keys.Left)))
@@ -367,7 +370,7 @@ namespace TestGame
                 {
                     LoadLevel(player.GetLevel() + 1);
                     InitializeLevel();
-                    playing = true;
+                    gameState = GameStateEnum.Playing;
                 }
             }
             pkbs = kbs;
@@ -381,15 +384,15 @@ namespace TestGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            if (!started)
+            if (gameState == GameStateEnum.MainMenu)
             {
-                DrawStartMenuScreen();
+                DrawMainMenuScreen();
             }
-            else if (!playing)
+            else if (gameState == GameStateEnum.LevelSelection)
             {
                 DrawLevelSelection();
             }
-            else
+            else if (gameState == GameStateEnum.Playing)
             {
                 DrawPlayingScreen();
                 DrawHUD();
@@ -466,7 +469,7 @@ namespace TestGame
             spriteBatch.End();
         }
 
-        void DrawStartMenuScreen()
+        void DrawMainMenuScreen()
         {
             int d, y;
             d = (int)((height + hudHeight) * 0.6 / (startMenu.options.Count - 1));
@@ -484,11 +487,18 @@ namespace TestGame
             spriteBatch.End();
         }
 
+        void DrawStartScreen()
+        {
+            spriteBatch.Begin();
+            spriteBatch.Draw(startScreen, Vector2.Zero, Color.White);
+            spriteBatch.End();
+        }
+
         void UpdatePlayerPosition()
         {
             player.prevPos = player.pos;
 
-            if (playing)
+            if (gameState == GameStateEnum.Playing)
             {
                 if (!(kbs.IsKeyDown(Keys.Left) || kbs.IsKeyDown(Keys.Right) || kbs.IsKeyDown(Keys.A) || kbs.IsKeyDown(Keys.D)))
                 {
@@ -548,7 +558,7 @@ namespace TestGame
             player.UpdateDirection();
             if (player.pos != player.prevPos)
             {
-                if (player.pos.Y != player.prevPos.Y && playing)
+                if (player.pos.Y != player.prevPos.Y && gameState == GameStateEnum.Playing)
                     player.state = PlayerSpriteEnum.Jumping;
                 else if (player.pos.X != player.prevPos.X && !player.isJumping)
                     player.state = PlayerSpriteEnum.Walking;

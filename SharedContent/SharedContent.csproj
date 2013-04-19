@@ -98,6 +98,7 @@
     <Compile Include="GameObject.cs" />
     <Compile Include="CollectibleEnum.cs" />
     <Compile Include="EnemyEnum.cs" />
+    <Compile Include="GameStateEnum.cs" />
     <Compile Include="ICollisionable.cs" />
     <Compile Include="LevelMenu.cs" />
     <Compile Include="StartMenu.cs" />

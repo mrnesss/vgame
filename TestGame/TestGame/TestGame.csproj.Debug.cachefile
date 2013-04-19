@@ -13,7 +13,8 @@ Content\Texture\Menu\Background\LevelSelect.xnb
 Content\Texture\Map\Background\Background.xnb
 Content\Texture\Menu\Background\StartMenu.xnb
 Content\Texture\Player\Lili_Walking.xnb
+Content\Texture\Menu\Background\Start_Screen.xnb
+Content\XML\Map\Map_1.xnb
 Content\XML\Object\Object.xnb
 Content\XML\Menu\Level_Selection.xnb
 Content\XML\Menu\Start_Menu.xnb
-Content\XML\Map\Map_1.xnb
