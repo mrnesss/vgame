@@ -86,59 +86,19 @@ namespace TestGame
             player = new Player(PlayerSpriteEnum.Standing, new Vector2(700.0f, 350.0f), Direction.Left, 10.0f, 20.0f, new Vector2(0.1f, 0.0f));
 
             // Add player itemSprites to dictionary
-            player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 8, new Rectangle(0, 0, 71, 103), new Vector2(35.0f, 90.0f), 1.0f));
-            player.AddSprite(PlayerSpriteEnum.Walking, new PlayerSprite(PlayerSpriteEnum.Walking, 8, new Rectangle(0, 103, 65, 103), new Vector2(32.0f, 103.0f), 5.5f));
-            player.AddSprite(PlayerSpriteEnum.Jumping, new PlayerSprite(PlayerSpriteEnum.Jumping, 1, new Rectangle(0, 206, 76, 103), new Vector2(38.0f, 103.0f), 1.0f));
+            //player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 8, new Rectangle(0, 0, 71, 103), new Vector2(35.0f, 90.0f), 1.0f));
+            //player.AddSprite(PlayerSpriteEnum.Walking, new PlayerSprite(PlayerSpriteEnum.Walking, 8, new Rectangle(0, 103, 65, 103), new Vector2(32.0f, 103.0f), 5.5f));
+            //player.AddSprite(PlayerSpriteEnum.Jumping, new PlayerSprite(PlayerSpriteEnum.Jumping, 1, new Rectangle(0, 206, 76, 103), new Vector2(38.0f, 103.0f), 1.0f));
+            player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 14, new Rectangle(0, 0, 145, 193), new Vector2(72.5f, 170.0f), 1.0f));
+            player.AddSprite(PlayerSpriteEnum.Walking, new PlayerSprite(PlayerSpriteEnum.Walking, 14, new Rectangle(0, 0, 145, 193), new Vector2(72.5f, 170.0f), 5.5f));
+            player.AddSprite(PlayerSpriteEnum.Jumping, new PlayerSprite(PlayerSpriteEnum.Jumping, 14, new Rectangle(0, 0, 145, 193), new Vector2(72.5f, 170.0f), 1.0f));
 
             base.Initialize();
-
-            // Initialize map info
-            itemCounter = map.collectibles;
-
-            // Add item sprites to dictionary
-            foreach (String e in map.GetItemTypes())
-            {
-                CollectibleEnum i = (CollectibleEnum)Enum.Parse(typeof(CollectibleEnum), e);
-                Rectangle rect = new Rectangle(0, 0, collectibleTextures[i].Width / objectInfo.collectibles[i].sprite.frames, collectibleTextures[i].Height);
-                itemSprites.Add(i, new Sprite(i, collectibleTextures[i], objectInfo.collectibles[i].sprite.frames, rect, Vector2.Zero));
-            }
-
-            // Add enemy sprites to dictionary
-            foreach (String e in map.GetEnemyTypes())
-            {
-                EnemyEnum i = (EnemyEnum)Enum.Parse(typeof(EnemyEnum), e);
-                Rectangle rect = new Rectangle(0, 0, enemyTextures[i].Width / objectInfo.enemies[i].sprite.frames, enemyTextures[i].Height);
-                enemySprites.Add(i, new Sprite(i, enemyTextures[i], objectInfo.enemies[i].sprite.frames, rect, Vector2.Zero));
-            }
-
-            // Add map sprites to list
-            mapSprites.Add(MapEnum.Platform, new Sprite(MapEnum.Platform, mapTextures[MapEnum.Platform], 1, mapTextures[MapEnum.Platform].Bounds, Vector2.Zero));
-
-            // Add items to list
-            foreach (Map.Item e in map.items)
-                mapItems.Add(new GameObject(itemSprites[e.type], e.pos, objectInfo.collectibles[e.type].updateTime));
-
-            // Add enemies to list
-            foreach (Map.Enemy e in map.enemies)
-                mapEnemies.Add(new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed));
-
-            // Add map objects to list
-            foreach (Map.Platform e in map.platforms)
-            {
-                mapPlatforms.Add(new MapObject(mapSprites[e.type], e.pos));
-            }
 
             // Add texture data
             foreach (PlayerSpriteEnum e in Enum.GetValues(typeof(PlayerSpriteEnum)))
             {
                 player.sprites[e].SetTextureData(playerTexture);
-            }
-
-            // Add texture data to items
-            foreach (String e in map.GetItemTypes())
-            {
-                CollectibleEnum i = (CollectibleEnum)Enum.Parse(typeof(CollectibleEnum), e);
-                itemSprites[i].SetTextureData(itemSprites[i].texture);
             }
         }
 
@@ -148,15 +108,6 @@ namespace TestGame
         /// </summary>
         protected override void LoadContent()
         {
-            DirectoryInfo dir;
-            FileInfo[] files;
-            string path;
-            string filename;
-
-            // Load XML info
-            map = Content.Load<Map>("XML/Map/Map1");
-            objectInfo = Content.Load<ObjectInfo>("XML/Object/Object");
-
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -167,40 +118,8 @@ namespace TestGame
             background = Content.Load<Texture2D>("Texture/Map/Background/Background");
 
             // Load player textures
-            playerTexture = Content.Load<Texture2D>("Texture/Player/Sprites");
-            
-            // Load map textures
-            path = "Texture/Map/Platform/";
-            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
-            files = dir.GetFiles();
-            foreach (FileInfo e in files)
-            {
-                filename = e.Name.Split('.')[0];
-                if (map.GetPlatformTypes().Contains(filename))
-                    mapTextures.Add((MapEnum)Enum.Parse(typeof(MapEnum), filename), Content.Load<Texture2D>(path + filename));
-            }
-
-            // Load collectibles textures
-            path = "Texture/Collectible/Item/";
-            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
-            files = dir.GetFiles();
-            foreach (FileInfo e in files)
-            {
-                filename = e.Name.Split('.')[0];
-                if (map.GetItemTypes().Contains(filename))
-                    collectibleTextures.Add((CollectibleEnum)Enum.Parse(typeof(CollectibleEnum), filename), Content.Load<Texture2D>(path + filename));
-            }
-
-            // Load enemies textures
-            path = "Texture/Enemy/";
-            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
-            files = dir.GetFiles();
-            foreach (FileInfo e in files)
-            {
-                filename = e.Name.Split('.')[0];
-                if (map.GetEnemyTypes().Contains(filename))
-                    enemyTextures.Add((EnemyEnum)Enum.Parse(typeof(EnemyEnum), filename), Content.Load<Texture2D>(path + filename));
-            }
+            //playerTexture = Content.Load<Texture2D>("Texture/Player/Sprites");
+            playerTexture = Content.Load<Texture2D>("Texture/Player/Lili_Walking");
 
             // Load start menu
             startMenu = Content.Load<StartMenu>("XML/Menu/Start_Menu");
@@ -282,8 +201,100 @@ namespace TestGame
         }
         }
 
+        void LoadLevel(int level)
+        {
+            DirectoryInfo dir;
+            FileInfo[] files;
+            string path;
+            string filename;
+
+            // Load XML info
+            map = Content.Load<Map>("XML/Map/Map_" + level);
+            objectInfo = Content.Load<ObjectInfo>("XML/Object/Object");
+
+            // Load map textures
+            path = "Texture/Map/Platform/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                if (map.GetPlatformTypes().Contains(filename))
+                    mapTextures.Add((MapEnum)Enum.Parse(typeof(MapEnum), filename), Content.Load<Texture2D>(path + filename));
+            }
+
+            // Load collectibles textures
+            path = "Texture/Collectible/Item/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                if (map.GetItemTypes().Contains(filename))
+                    collectibleTextures.Add((CollectibleEnum)Enum.Parse(typeof(CollectibleEnum), filename), Content.Load<Texture2D>(path + filename));
+            }
+
+            // Load enemies textures
+            path = "Texture/Enemy/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                if (map.GetEnemyTypes().Contains(filename))
+                    enemyTextures.Add((EnemyEnum)Enum.Parse(typeof(EnemyEnum), filename), Content.Load<Texture2D>(path + filename));
+            }
+        }
+
+        void InitializeLevel()
+        {
+            // Initialize map info
+            itemCounter = map.collectibles;
+
+            // Add item sprites to dictionary
+            foreach (String e in map.GetItemTypes())
+            {
+                CollectibleEnum i = (CollectibleEnum)Enum.Parse(typeof(CollectibleEnum), e);
+                Rectangle rect = new Rectangle(0, 0, collectibleTextures[i].Width / objectInfo.collectibles[i].sprite.frames, collectibleTextures[i].Height);
+                itemSprites.Add(i, new Sprite(i, collectibleTextures[i], objectInfo.collectibles[i].sprite.frames, rect, Vector2.Zero));
+            }
+
+            // Add enemy sprites to dictionary
+            foreach (String e in map.GetEnemyTypes())
+            {
+                EnemyEnum i = (EnemyEnum)Enum.Parse(typeof(EnemyEnum), e);
+                Rectangle rect = new Rectangle(0, 0, enemyTextures[i].Width / objectInfo.enemies[i].sprite.frames, enemyTextures[i].Height);
+                enemySprites.Add(i, new Sprite(i, enemyTextures[i], objectInfo.enemies[i].sprite.frames, rect, Vector2.Zero));
+            }
+
+            // Add map sprites to list
+            mapSprites.Add(MapEnum.Platform, new Sprite(MapEnum.Platform, mapTextures[MapEnum.Platform], 1, mapTextures[MapEnum.Platform].Bounds, Vector2.Zero));
+
+            // Add items to list
+            foreach (Map.Item e in map.items)
+                mapItems.Add(new GameObject(itemSprites[e.type], e.pos, objectInfo.collectibles[e.type].updateTime));
+
+            // Add enemies to list
+            foreach (Map.Enemy e in map.enemies)
+                mapEnemies.Add(new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed));
+
+            // Add map objects to list
+            foreach (Map.Platform e in map.platforms)
+            {
+                mapPlatforms.Add(new MapObject(mapSprites[e.type], e.pos));
+            }
+
+            // Add texture data to items
+            foreach (String e in map.GetItemTypes())
+            {
+                CollectibleEnum i = (CollectibleEnum)Enum.Parse(typeof(CollectibleEnum), e);
+                itemSprites[i].SetTextureData(itemSprites[i].texture);
+            }
+        }
+
         void CheckKeyboardState()
         {
+            // Game started, currently playing
             if (playing)
             {
                 foreach (Keys key in kbs.GetPressedKeys())
@@ -323,19 +334,41 @@ namespace TestGame
                     }
                 }
             }
+            // Game hasn't started, start menu screen
             else if (!started)
             {
-                if (kbs.GetPressedKeys().Contains(Keys.W) && !pkbs.GetPressedKeys().Contains(Keys.W))
-                    player.ChangeLevel(-1, levelMenu.levels);
-                else if (kbs.GetPressedKeys().Contains(Keys.S) && !pkbs.GetPressedKeys().Contains(Keys.S))
-                    player.ChangeLevel(1, levelMenu.levels);
+                if ((kbs.GetPressedKeys().Contains(Keys.W) && !pkbs.GetPressedKeys().Contains(Keys.W)) ||
+                    (kbs.GetPressedKeys().Contains(Keys.Up) && !pkbs.GetPressedKeys().Contains(Keys.Up)))
+                    startMenu.ChangeOption(-1, startMenu.options.Count);
+                else if ((kbs.GetPressedKeys().Contains(Keys.S) && !pkbs.GetPressedKeys().Contains(Keys.S)) ||
+                    (kbs.GetPressedKeys().Contains(Keys.Down) && !pkbs.GetPressedKeys().Contains(Keys.Down)))
+                    startMenu.ChangeOption(1, startMenu.options.Count);
+                else if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter))
+                {
+                    switch (startMenu.options[startMenu.selectedOption])
+                    {
+                        case "Start":
+                            started = true;
+                            break;
+                    }
+                }
+                    
             }
+            // Game started, level selection screen
             else
             {
-                if (kbs.GetPressedKeys().Contains(Keys.A) && !pkbs.GetPressedKeys().Contains(Keys.A))
+                if ((kbs.GetPressedKeys().Contains(Keys.A) && !pkbs.GetPressedKeys().Contains(Keys.A)) ||
+                    (kbs.GetPressedKeys().Contains(Keys.Left) && !pkbs.GetPressedKeys().Contains(Keys.Left)))
                     player.ChangeLevel(-1, levelMenu.levels);
-                else if (kbs.GetPressedKeys().Contains(Keys.D) && !pkbs.GetPressedKeys().Contains(Keys.D))
+                else if ((kbs.GetPressedKeys().Contains(Keys.D) && !pkbs.GetPressedKeys().Contains(Keys.D)) ||
+                    (kbs.GetPressedKeys().Contains(Keys.Right) && !pkbs.GetPressedKeys().Contains(Keys.Right)))
                     player.ChangeLevel(1, levelMenu.levels);
+                else if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter))
+                {
+                    LoadLevel(player.GetLevel() + 1);
+                    InitializeLevel();
+                    playing = true;
+                }
             }
             pkbs = kbs;
         }
@@ -374,7 +407,7 @@ namespace TestGame
         {
             spriteBatch.Begin();
             spriteBatch.Draw(levelMenu.background, Vector2.Zero, Color.White);
-            spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Left) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             spriteBatch.End();
         }
 
@@ -407,7 +440,7 @@ namespace TestGame
                     spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha);
             }
 
-            spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Left) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             spriteBatch.End();
         }
 
@@ -436,13 +469,16 @@ namespace TestGame
         void DrawStartMenuScreen()
         {
             int d, y;
-            d = (int)((height + hudHeight) * 0.6 / (startMenu.options.GetLength(0) - 1));
+            d = (int)((height + hudHeight) * 0.6 / (startMenu.options.Count - 1));
             y = (int)((height + hudHeight) * 0.2);
             spriteBatch.Begin();
             spriteBatch.Draw(startMenu.background, Vector2.Zero, Color.White);
-            foreach (String e in startMenu.options)
+            foreach (KeyValuePair<int, String> e in startMenu.options)
             {
-                spriteBatch.DrawString(spriteFont, e, new Vector2(width / 2 - spriteFont.MeasureString(e).X / 2, y - spriteFont.MeasureString(e).Y / 2), Color.White);
+                if(e.Key == startMenu.selectedOption)
+                    spriteBatch.DrawString(spriteFont, e.Value, new Vector2(width / 2 - spriteFont.MeasureString(e.Value).X / 2, y - spriteFont.MeasureString(e.Value).Y / 2), Color.White, 0.0f, Vector2.Zero, 1.3f, SpriteEffects.None, 0);
+                else
+                    spriteBatch.DrawString(spriteFont, e.Value, new Vector2(width / 2 - spriteFont.MeasureString(e.Value).X / 2, y - spriteFont.MeasureString(e.Value).Y / 2), Color.White);
                 y += d;
             }
             spriteBatch.End();
