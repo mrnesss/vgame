@@ -31,15 +31,19 @@ namespace SharedContent
         public Player(PlayerSpriteEnum state, Vector2 pos, Direction dir, float speed, float jump, Vector2 acceleration)
         {
             this.state = state;
-            prevState = state;
-            sprites = new Dictionary<Enum, PlayerSprite>();
             this.pos = pos;
-            prevPos = pos;
             this.dir = dir;
             this.jump = jump;
-            jumpVel = new Vector2(0, jump);
             this.speed = speed;
             this.acceleration = acceleration;
+            sprites = new Dictionary<Enum, PlayerSprite>();
+            prevPos = pos;
+            jumpVel = new Vector2(0, jump);
+        }
+
+        public void Initialize()
+        {
+            prevState = state;
             velocity = Vector2.Zero;
             isJumping = false;
             isFalling = true;

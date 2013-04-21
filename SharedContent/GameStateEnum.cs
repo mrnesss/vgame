@@ -10,6 +10,7 @@ namespace SharedContent
         StartScreen,
         MainMenu,
         LevelSelection,
-        Playing
+        Playing,
+        Paused
     }
 }

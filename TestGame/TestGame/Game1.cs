@@ -27,14 +27,11 @@ namespace TestGame
         Viewport viewport;
         Map map;
         ObjectInfo objectInfo;
-        Texture2D background, startScreen;
+        Texture2D background, startScreen, cover;
         LevelMenu levelMenu;
         StartMenu startMenu;
 
         Player player;
-        bool pause = false;
-        //bool playing = false;
-        //bool started = false;
         GameStateEnum gameState;
 
         Texture2D playerTexture;
@@ -77,7 +74,7 @@ namespace TestGame
         /// </summary>
         protected override void Initialize()
         {
-            gameState = GameStateEnum.MainMenu;
+            gameState = GameStateEnum.StartScreen;
             viewport = new Viewport(-200, -200, 400, 400);
             kbs = new KeyboardState();
             friction = new Vector2(0.1f, 0.0f);
@@ -120,6 +117,9 @@ namespace TestGame
             // Load start screen
             startScreen = Content.Load<Texture2D>("Texture/Menu/Background/Start_Screen");
 
+            // Load cover
+            cover = Content.Load<Texture2D>("Texture/UI/Cover");
+
             // Load player textures
             //playerTexture = Content.Load<Texture2D>("Texture/Player/Sprites");
             playerTexture = Content.Load<Texture2D>("Texture/Player/Lili_Walking");
@@ -152,56 +152,65 @@ namespace TestGame
         protected override void Update(GameTime gameTime)
         {
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.P) && !kbs.GetPressedKeys().Contains(Keys.P))
-                pause ^= true;
+            {
+                if (gameState == GameStateEnum.Playing)
+                    gameState = GameStateEnum.Paused;
+                else if (gameState == GameStateEnum.Paused)
+                    gameState = GameStateEnum.Playing;
+            }
             kbs = Keyboard.GetState();
 
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            if(!pause){
-            //TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 250);
-            //IsFixedTimeStep = true;
-
-            elapsedGameTime += gameTime.ElapsedGameTime;
-            time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", elapsedGameTime);
-
-            // Check collisions
-            if (gameState == GameStateEnum.Playing)
-            {
-                CheckPlayerCollisions();
-                CheckEnemiesCollisions();
-            }
-
             // Check pressed keys
             CheckKeyboardState();
 
-            // Update position
-            UpdatePlayerPosition();
+            time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", elapsedGameTime);
 
-            // Update animation
-            UpdatePlayerAnimation();
+            //TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 250);
+            //IsFixedTimeStep = true;
 
-            // Update game items animation
-            foreach (GameObject i in mapItems)
+            if (gameState == GameStateEnum.Playing || gameState == GameStateEnum.LevelSelection)
             {
-                i.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
-                i.UpdatePosition();
+                // Update position
+                UpdatePlayerPosition();
+
+                // Update animation
+                UpdatePlayerAnimation();
             }
 
-            // Update game enemies animation / state
-            foreach (EnemyObject e in mapEnemies)
+            // If game is currently unpaused
+            if (gameState == GameStateEnum.Playing)
             {
-                e.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
-                e.UpdatePosition(gravity, player.pos);
+                // Check collisions
+                CheckPlayerCollisions();
+                CheckEnemiesCollisions();
+
+                // Update game items animation
+                foreach (GameObject i in mapItems)
+                {
+                    i.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
+                    i.UpdatePosition();
+                }
+
+                // Update game enemies animation / state
+                foreach (EnemyObject e in mapEnemies)
+                {
+                    e.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
+                    e.UpdatePosition(gravity, player.pos);
+                }
+
+                // Update game time
+                elapsedGameTime += gameTime.ElapsedGameTime;
             }
 
-            if(elapsedTime >= gameSpeed)
+            base.Update(gameTime);
+
+            if (elapsedTime >= gameSpeed)
                 elapsedTime = 0;
             elapsedTime += gameTime.ElapsedGameTime.Milliseconds;
-            
-            base.Update(gameTime);
-        }
         }
 
         void LoadLevel(int level)
@@ -370,7 +379,17 @@ namespace TestGame
                 {
                     LoadLevel(player.GetLevel() + 1);
                     InitializeLevel();
+                    player.Initialize();
                     gameState = GameStateEnum.Playing;
+                    elapsedGameTime = TimeSpan.Zero;
+                }
+            }
+            // Start screen
+            else if (gameState == GameStateEnum.StartScreen)
+            {
+                if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter))
+                {
+                    gameState = GameStateEnum.MainMenu;
                 }
             }
             pkbs = kbs;
@@ -383,8 +402,12 @@ namespace TestGame
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            if (gameState == GameStateEnum.MainMenu)
+            if (gameState == GameStateEnum.Playing || gameState == GameStateEnum.Paused)
+            {
+                DrawPlayingScreen();
+                DrawHUD();
+            }
+            else if (gameState == GameStateEnum.MainMenu)
             {
                 DrawMainMenuScreen();
             }
@@ -392,15 +415,15 @@ namespace TestGame
             {
                 DrawLevelSelection();
             }
-            else if (gameState == GameStateEnum.Playing)
+            else if (gameState == GameStateEnum.StartScreen)
             {
-                DrawPlayingScreen();
-                DrawHUD();
+                DrawStartScreen();
             }
 
             // Draw cursor
             spriteBatch.Begin();
             spriteBatch.Draw(cursor, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
+            spriteBatch.DrawString(spriteFont, gameTime.TotalGameTime.ToString(), new Vector2(100.0f, 100.0f), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -451,6 +474,7 @@ namespace TestGame
         {
             int x = 0;
             float scale = 1.0f;
+            string pauseStr = "Pause";
             spriteBatch.Begin();
             spriteBatch.DrawString(spriteFont, time, new Vector2(0.0f, 0.0f), Color.White);
             foreach (KeyValuePair<Enum, Sprite> i in itemSprites)
@@ -465,7 +489,11 @@ namespace TestGame
                 spriteBatch.DrawString(spriteFont, counter, new Vector2(x - spriteFont.MeasureString(counter).X + i.Value.rect.Width * scale, position.Y), Color.White);
                 x += (int)Math.Ceiling(i.Value.rect.Width * scale);
             }
-            spriteBatch.DrawString(spriteFont, str, new Vector2(100.0f, 100.0f), Color.White);
+            if (gameState == GameStateEnum.Paused)
+            {
+                spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White);
+                spriteBatch.DrawString(spriteFont, pauseStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(pauseStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(pauseStr).Y / 2), Color.White);
+            }
             spriteBatch.End();
         }
 
@@ -489,8 +517,10 @@ namespace TestGame
 
         void DrawStartScreen()
         {
+            string startStr = "Press ENTER to start the game";
             spriteBatch.Begin();
             spriteBatch.Draw(startScreen, Vector2.Zero, Color.White);
+            spriteBatch.DrawString(spriteFont, startStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(startStr).X / 2, graphics.PreferredBackBufferHeight / 2), Color.White);
             spriteBatch.End();
         }
 
@@ -534,7 +564,7 @@ namespace TestGame
                     player.pos = Vector2.Add(gravity, player.pos);
                 }
             }
-            else
+            else if (gameState == GameStateEnum.LevelSelection)
             {
                 Vector2 v1, v2, v3;
                 v1 = new Vector2(levelMenu.positions[player.GetLevel()].X - player.pos.X, levelMenu.positions[player.GetLevel()].Y - player.pos.Y);
@@ -542,7 +572,6 @@ namespace TestGame
                 v1.Normalize();
                 v1 *= player.speed / 2;
                 v3 = (v1.Length() < v2.Length()) ? v1 : v2;
-                str = v3.ToString();
                 if (player.pos != levelMenu.positions[player.GetLevel()])
                 {
                     player.SetVelocity(v3);
@@ -550,6 +579,7 @@ namespace TestGame
                 else
                     player.SetVelocity(Vector2.Zero);
             }
+
             player.pos = Vector2.Add(player.GetVelocity(), player.pos);
         }
 
