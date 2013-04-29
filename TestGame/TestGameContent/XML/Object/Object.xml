@@ -3,24 +3,45 @@
   <Asset Type="SharedContent.ObjectInfo">
     <collectibles>
       <Item>
-        <Key>StarCoin</Key>
+        <Key>Butter</Key>
         <Value>
           <frames>1</frames>
           <updateTime>0</updateTime>
         </Value>
       </Item>
       <Item>
-        <Key>GoldCoin</Key>
+        <Key>Eggs</Key>
         <Value>
-          <frames>8</frames>
-          <updateTime>100</updateTime>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
         </Value>
       </Item>
       <Item>
-        <Key>Test</Key>
+        <Key>Flour</Key>
         <Value>
-          <frames>8</frames>
-          <updateTime>75</updateTime>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
+        </Value>
+      </Item>
+      <Item>
+        <Key>Milk</Key>
+        <Value>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
+        </Value>
+      </Item>
+      <Item>
+        <Key>Sugar</Key>
+        <Value>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
+        </Value>
+      </Item>
+      <Item>
+        <Key>Vanilla</Key>
+        <Value>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
         </Value>
       </Item>
     </collectibles>

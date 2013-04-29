@@ -86,17 +86,11 @@ namespace TestGame
             //player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 8, new Rectangle(0, 0, 71, 103), new Vector2(35.0f, 90.0f), 1.0f));
             //player.AddSprite(PlayerSpriteEnum.Walking, new PlayerSprite(PlayerSpriteEnum.Walking, 8, new Rectangle(0, 103, 65, 103), new Vector2(32.0f, 103.0f), 5.5f));
             //player.AddSprite(PlayerSpriteEnum.Jumping, new PlayerSprite(PlayerSpriteEnum.Jumping, 1, new Rectangle(0, 206, 76, 103), new Vector2(38.0f, 103.0f), 1.0f));
-            player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 14, new Rectangle(0, 0, 145, 193), new Vector2(72.5f, 170.0f), 1.0f));
-            player.AddSprite(PlayerSpriteEnum.Walking, new PlayerSprite(PlayerSpriteEnum.Walking, 14, new Rectangle(0, 0, 145, 193), new Vector2(72.5f, 170.0f), 5.5f));
-            player.AddSprite(PlayerSpriteEnum.Jumping, new PlayerSprite(PlayerSpriteEnum.Jumping, 14, new Rectangle(0, 0, 145, 193), new Vector2(72.5f, 170.0f), 1.0f));
+            //player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 14, new Rectangle(0, 0, 146, 280), new Vector2(72.5f, 170.0f), 1.0f));
+            //player.AddSprite(PlayerSpriteEnum.Walking, new PlayerSprite(PlayerSpriteEnum.Walking, 14, new Rectangle(0, 0, 146, 280), new Vector2(72.5f, 170.0f), 5.5f));
+            //player.AddSprite(PlayerSpriteEnum.Jumping, new PlayerSprite(PlayerSpriteEnum.Jumping, 14, new Rectangle(0, 0, 146, 280), new Vector2(72.5f, 170.0f), 1.0f));
 
             base.Initialize();
-
-            // Add texture data
-            foreach (PlayerSpriteEnum e in Enum.GetValues(typeof(PlayerSpriteEnum)))
-            {
-                player.sprites[e].SetTextureData(playerTexture);
-            }
         }
 
         /// <summary>
@@ -105,6 +99,12 @@ namespace TestGame
         /// </summary>
         protected override void LoadContent()
         {
+            DirectoryInfo dir;
+            FileInfo[] files;
+            List<Texture2D> textures;
+            string path;
+            string filename;
+
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -120,9 +120,30 @@ namespace TestGame
             // Load cover
             cover = Content.Load<Texture2D>("Texture/UI/Cover");
 
+            // Load map textures
+            path = "Texture/Map/Platform/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+
             // Load player textures
+            foreach (String s in Enum.GetNames(typeof(PlayerSpriteEnum)))
+            {
+                path = "Texture/Player/" + s + "/";
+                dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+                files = dir.GetFiles();
+                textures = new List<Texture2D>();
+                foreach (FileInfo e in files)
+                {
+                    filename = e.Name.Split('.')[0];
+                    textures.Add(Content.Load<Texture2D>(path + filename));
+                }
+                PlayerSprite sprite = new PlayerSprite((PlayerSpriteEnum)Enum.Parse(typeof(PlayerSpriteEnum), s), textures, new Vector2(textures.ElementAt(0).Width / 2, 316.0f));
+                player.AddSprite((PlayerSpriteEnum)sprite.id, sprite);
+                sprite.SetTextureData();
+            }
+            
             //playerTexture = Content.Load<Texture2D>("Texture/Player/Sprites");
-            playerTexture = Content.Load<Texture2D>("Texture/Player/Lili_Walking");
+            playerTexture = Content.Load<Texture2D>("Texture/Player/lilicamin2");
 
             // Load start menu
             startMenu = Content.Load<StartMenu>("XML/Menu/Start_Menu");
@@ -423,7 +444,7 @@ namespace TestGame
             // Draw cursor
             spriteBatch.Begin();
             spriteBatch.Draw(cursor, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
-            spriteBatch.DrawString(spriteFont, gameTime.TotalGameTime.ToString(), new Vector2(100.0f, 100.0f), Color.White);
+            spriteBatch.DrawString(spriteFont, player.sprites[player.state].rect.ToString(), new Vector2(100.0f, 100.0f), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -433,13 +454,13 @@ namespace TestGame
         {
             spriteBatch.Begin();
             spriteBatch.Draw(levelMenu.background, Vector2.Zero, Color.White);
-            spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             spriteBatch.End();
         }
 
         void DrawPlayingScreen()
         {
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation((int)(-player.pos.X + (width / 2)), (int)(-player.pos.Y + player.sprites[player.state].rect.Height + (height / 2)), 0.0f));
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation((int)(-player.pos.X + (width / 2)), (int)(-player.pos.Y + player.sprites[player.state].rect.Height + (height / 4)), 0.0f));
 
             // Draw background
             spriteBatch.Draw(background, Vector2.Zero, Color.White);
@@ -455,7 +476,7 @@ namespace TestGame
             {
                 e.sprite.rect.X = itemSprites[e.sprite.id].rect.Width * e.frame;
                 if (e.alive)
-                    spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha);
+                    spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha, 0.0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0);
             }
 
             // Draw enemies
@@ -466,7 +487,7 @@ namespace TestGame
                     spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha);
             }
 
-            spriteBatch.Draw(playerTexture, new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             spriteBatch.End();
         }
 
@@ -606,7 +627,7 @@ namespace TestGame
             if (elapsedTime >= gameSpeed)
             {
                 player.frame = (player.frame + 1) % player.sprites[player.state].frames;
-                player.sprites[player.state].rect.X = player.sprites[player.state].rect.Width * player.frame;
+                //player.sprites[player.state].rect.X = player.sprites[player.state].rect.Width * player.frame;
             }
         }
 

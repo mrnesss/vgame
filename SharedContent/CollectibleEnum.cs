@@ -7,8 +7,11 @@ namespace SharedContent
 {
     public enum CollectibleEnum
     {
-        StarCoin,
-        GoldCoin,
-        Test
+        Butter,
+        Eggs,
+        Flour,
+        Milk,
+        Sugar,
+        Vanilla
     }
 }
