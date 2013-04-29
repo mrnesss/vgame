@@ -38,6 +38,8 @@ namespace TestGame
         int gameSpeed = 100;
         int elapsedTime = 0;
         string time;
+        int blinkCounter;
+        bool blink;
         Vector2 gravity;
         Vector2 friction;
 
@@ -438,13 +440,14 @@ namespace TestGame
             }
             else if (gameState == GameStateEnum.StartScreen)
             {
+                blinkCounter += gameTime.ElapsedGameTime.Milliseconds;
                 DrawStartScreen();
             }
 
             // Draw cursor
             spriteBatch.Begin();
             spriteBatch.Draw(cursor, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
-            spriteBatch.DrawString(spriteFont, player.sprites[player.state].rect.ToString(), new Vector2(100.0f, 100.0f), Color.White);
+            //spriteBatch.DrawString(spriteFont, gameTime.TotalGameTime.ToString(), new Vector2(100.0f, 100.0f), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -539,9 +542,15 @@ namespace TestGame
         void DrawStartScreen()
         {
             string startStr = "Press ENTER to start the game";
+            if (blinkCounter > 750)
+            {
+                blinkCounter = 0;
+                blink ^= true;
+            }
             spriteBatch.Begin();
             spriteBatch.Draw(startScreen, Vector2.Zero, Color.White);
-            spriteBatch.DrawString(spriteFont, startStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(startStr).X / 2, graphics.PreferredBackBufferHeight / 2), Color.White);
+            if (!blink)
+                spriteBatch.DrawString(spriteFont, startStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(startStr).X / 2, graphics.PreferredBackBufferHeight / 2), Color.White);
             spriteBatch.End();
         }
 
