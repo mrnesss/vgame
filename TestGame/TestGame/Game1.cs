@@ -139,7 +139,7 @@ namespace TestGame
                     filename = e.Name.Split('.')[0];
                     textures.Add(Content.Load<Texture2D>(path + filename));
                 }
-                PlayerSprite sprite = new PlayerSprite((PlayerSpriteEnum)Enum.Parse(typeof(PlayerSpriteEnum), s), textures, new Vector2(textures.ElementAt(0).Width / 2, 316.0f));
+                PlayerSprite sprite = new PlayerSprite((PlayerSpriteEnum)Enum.Parse(typeof(PlayerSpriteEnum), s), textures, new Vector2(textures.ElementAt(0).Width / 2, textures.ElementAt(0).Height));
                 player.AddSprite((PlayerSpriteEnum)sprite.id, sprite);
                 sprite.SetTextureData();
             }

@@ -289,20 +289,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Player\Jumping\Lily_caminado0001.png">
-      <Name>Lily_caminado0001</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Texture\Player\Jumping\Lily_caminado0002.png">
-      <Name>Lily_caminado0002</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Texture\Collectible\Item\Butter.png">
       <Name>Butter</Name>
       <Importer>TextureImporter</Importer>
@@ -402,6 +388,98 @@
     </Compile>
     <Compile Include="Texture\Player\Standing\Lily_parada0014.png">
       <Name>Lily_parada0014</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0001.png">
+      <Name>Lily_saltando0001</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0002.png">
+      <Name>Lily_saltando0002</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0003.png">
+      <Name>Lily_saltando0003</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0004.png">
+      <Name>Lily_saltando0004</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0005.png">
+      <Name>Lily_saltando0005</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0006.png">
+      <Name>Lily_saltando0006</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0007.png">
+      <Name>Lily_saltando0007</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0008.png">
+      <Name>Lily_saltando0008</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0009.png">
+      <Name>Lily_saltando0009</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0010.png">
+      <Name>Lily_saltando0010</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0011.png">
+      <Name>Lily_saltando0011</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0012.png">
+      <Name>Lily_saltando0012</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0013.png">
+      <Name>Lily_saltando0013</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0014.png">
+      <Name>Lily_saltando0014</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0015.png">
+      <Name>Lily_saltando0015</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0016.png">
+      <Name>Lily_saltando0016</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0017.png">
+      <Name>Lily_saltando0017</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Jumping\Lily_saltando0018.png">
+      <Name>Lily_saltando0018</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
