@@ -13,6 +13,12 @@ namespace SharedContent
 {
     public class Map
     {
+        public struct Scenery
+        {
+            public MapEnum type;
+            public Vector2 pos;
+        };
+
         public struct Platform
         {
             public MapEnum type;
@@ -31,6 +37,15 @@ namespace SharedContent
             public Vector2 pos;
         };
 
+        public struct Interactive
+        {
+            public MapEnum type;
+            public Vector2 pos;
+        };
+
+        public String background;
+        public List<Interactive> interactives;
+        public List<Scenery> scenery;
         public List<Platform> platforms;
         public List<Item> items;
         public List<Enemy> enemies;
@@ -62,6 +77,28 @@ namespace SharedContent
         {
             List<String> types = new List<String>();
             foreach (Enemy e in enemies)
+            {
+                if (!types.Contains(e.type.ToString()))
+                    types.Add(e.type.ToString());
+            }
+            return types;
+        }
+
+        public List<String> GetSceneryTypes()
+        {
+            List<String> types = new List<String>();
+            foreach (Scenery e in scenery)
+            {
+                if (!types.Contains(e.type.ToString()))
+                    types.Add(e.type.ToString());
+            }
+            return types;
+        }
+
+        public List<String> GetInteractiveTypes()
+        {
+            List<String> types = new List<String>();
+            foreach (Interactive e in interactives)
             {
                 if (!types.Contains(e.type.ToString()))
                     types.Add(e.type.ToString());

@@ -25,6 +25,7 @@ namespace SharedContent
         public bool isJumping;
         public bool isFalling;
         public bool canJump;
+        public float health;
 
         public String test;
 
@@ -50,6 +51,7 @@ namespace SharedContent
             canJump = false;
             frame = 0;
             level = 0;
+            health = 100.0f;
         }
 
         public void AddSprite(PlayerSpriteEnum id, PlayerSprite sprite)
@@ -102,8 +104,7 @@ namespace SharedContent
         {
             float distance = Math.Max(1, (float)Math.Abs(Math.Ceiling(pos.Y - prevPos.Y)));
             Rectangle r = new Rectangle((int)(pos.X - sprites[state].origin.X), (int)(pos.Y - distance), sprites[state].rect.Width, (int)distance);
-            test = "L:" + r.Left + " R:" + r.Right + " T:" + r.Top + " B:" + r.Bottom;
-            if (pos.X + sprites[state].rect.Width > rect.Left && pos.X < rect.Right && rect.Intersects(r))
+            if (pos.X > rect.Left && pos.X < rect.Right && rect.Intersects(r))
                 return true;
             else
                 return false;
@@ -121,6 +122,20 @@ namespace SharedContent
         public int GetLevel()
         {
             return level;
+        }
+
+        public float GetHealth()
+        {
+            return health;
+        }
+
+        public void SetHealth(float h)
+        {
+            health += h;
+            if (health >= 100.0f)
+                health = 100.0f;
+            else if (health < 0.0f)
+                health = 0.0f;
         }
     }
 }

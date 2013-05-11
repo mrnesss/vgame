@@ -9,6 +9,8 @@ namespace SharedContent
     {
         Standing,
         Walking,
-        Jumping
+        Jumping,
+        Dying,
+        Handing
     }
 }

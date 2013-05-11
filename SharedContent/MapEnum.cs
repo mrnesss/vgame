@@ -7,6 +7,10 @@ namespace SharedContent
 {
     public enum MapEnum
     {
-        Platform
+        Platform,
+        Stairs,
+        Shelf,
+        Drawer,
+        Oven
     }
 }

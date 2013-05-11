@@ -14,6 +14,8 @@ namespace SharedContent
         [ContentSerializerIgnore]
         public bool isFalling;
         public float speed;
+        [ContentSerializerIgnore]
+        public byte dir;
 
         public EnemyObject()
         {
@@ -25,6 +27,7 @@ namespace SharedContent
             this.speed = speed;
             prevPos = pos;
             isFalling = false;
+            dir = 1;
         }
 
         public void UpdatePosition(Vector2 gravity, Vector2 playerPos)

@@ -112,13 +112,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Font\Stanberry.png">
-      <Name>Stanberry</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>FontTextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Texture\Collectible\Item\Test.png">
       <Name>Test</Name>
       <Importer>TextureImporter</Importer>
@@ -141,7 +134,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Audio\" />
     <Folder Include="XML\Sprite\" />
   </ItemGroup>
   <ItemGroup>
@@ -167,13 +159,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Menu\Background\StartMenu.jpg">
-      <Name>StartMenu</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="XML\Menu\Start_Menu.xml">
       <Name>Start_Menu</Name>
       <Importer>XmlImporter</Importer>
@@ -184,13 +169,6 @@
   <ItemGroup>
     <Compile Include="Texture\Player\Lili_Walking.png">
       <Name>Lili_Walking</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Texture\Menu\Background\Start_Screen.jpg">
-      <Name>Start_Screen</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -480,6 +458,387 @@
     </Compile>
     <Compile Include="Texture\Player\Jumping\Lily_saltando0018.png">
       <Name>Lily_saltando0018</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Menu\Background\SC_Cool.jpg">
+      <Name>SC_Cool</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Menu\Background\Start_Screen.jpg">
+      <Name>Start_Screen</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Menu\Background\Menu_Screen.jpg">
+      <Name>Menu_Screen</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Audio\Baron_Knoxburry.mp3">
+      <Name>Baron_Knoxburry</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SongProcessor</Processor>
+    </Compile>
+    <Compile Include="Audio\Bit_Shifter.mp3">
+      <Name>Bit_Shifter</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SongProcessor</Processor>
+    </Compile>
+    <Compile Include="Audio\Ggeir_Tjelta.mp3">
+      <Name>Ggeir_Tjelta</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SongProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Font\Stanberry.spritefont">
+      <Name>Stanberry</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <SubType>Designer</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Map\Background\Wall.png">
+      <Name>Wall</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Map\Scenery\Drawer.png">
+      <Name>Drawer</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Map\Scenery\Shelf.png">
+      <Name>Shelf</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Map\Scenery\Stairs.png">
+      <Name>Stairs</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0001.png">
+      <Name>Lily_muerte0001</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0002.png">
+      <Name>Lily_muerte0002</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0003.png">
+      <Name>Lily_muerte0003</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0004.png">
+      <Name>Lily_muerte0004</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0005.png">
+      <Name>Lily_muerte0005</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0006.png">
+      <Name>Lily_muerte0006</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0007.png">
+      <Name>Lily_muerte0007</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0008.png">
+      <Name>Lily_muerte0008</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0009.png">
+      <Name>Lily_muerte0009</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0010.png">
+      <Name>Lily_muerte0010</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0011.png">
+      <Name>Lily_muerte0011</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0012.png">
+      <Name>Lily_muerte0012</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0013.png">
+      <Name>Lily_muerte0013</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0014.png">
+      <Name>Lily_muerte0014</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0015.png">
+      <Name>Lily_muerte0015</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0016.png">
+      <Name>Lily_muerte0016</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0017.png">
+      <Name>Lily_muerte0017</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0018.png">
+      <Name>Lily_muerte0018</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0019.png">
+      <Name>Lily_muerte0019</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0020.png">
+      <Name>Lily_muerte0020</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Dying\Lily_muerte0021.png">
+      <Name>Lily_muerte0021</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0001.png">
+      <Name>Lily_DandoLaMezcla0001</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0002.png">
+      <Name>Lily_DandoLaMezcla0002</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0003.png">
+      <Name>Lily_DandoLaMezcla0003</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0004.png">
+      <Name>Lily_DandoLaMezcla0004</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0005.png">
+      <Name>Lily_DandoLaMezcla0005</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0006.png">
+      <Name>Lily_DandoLaMezcla0006</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0007.png">
+      <Name>Lily_DandoLaMezcla0007</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0008.png">
+      <Name>Lily_DandoLaMezcla0008</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0009.png">
+      <Name>Lily_DandoLaMezcla0009</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0010.png">
+      <Name>Lily_DandoLaMezcla0010</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0011.png">
+      <Name>Lily_DandoLaMezcla0011</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0012.png">
+      <Name>Lily_DandoLaMezcla0012</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0013.png">
+      <Name>Lily_DandoLaMezcla0013</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0014.png">
+      <Name>Lily_DandoLaMezcla0014</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0015.png">
+      <Name>Lily_DandoLaMezcla0015</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0016.png">
+      <Name>Lily_DandoLaMezcla0016</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0017.png">
+      <Name>Lily_DandoLaMezcla0017</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0018.png">
+      <Name>Lily_DandoLaMezcla0018</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0019.png">
+      <Name>Lily_DandoLaMezcla0019</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0020.png">
+      <Name>Lily_DandoLaMezcla0020</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0021.png">
+      <Name>Lily_DandoLaMezcla0021</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0022.png">
+      <Name>Lily_DandoLaMezcla0022</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0023.png">
+      <Name>Lily_DandoLaMezcla0023</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0024.png">
+      <Name>Lily_DandoLaMezcla0024</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0025.png">
+      <Name>Lily_DandoLaMezcla0025</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0026.png">
+      <Name>Lily_DandoLaMezcla0026</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0027.png">
+      <Name>Lily_DandoLaMezcla0027</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0028.png">
+      <Name>Lily_DandoLaMezcla0028</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0029.png">
+      <Name>Lily_DandoLaMezcla0029</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0030.png">
+      <Name>Lily_DandoLaMezcla0030</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0031.png">
+      <Name>Lily_DandoLaMezcla0031</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0032.png">
+      <Name>Lily_DandoLaMezcla0032</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0033.png">
+      <Name>Lily_DandoLaMezcla0033</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0034.png">
+      <Name>Lily_DandoLaMezcla0034</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0035.png">
+      <Name>Lily_DandoLaMezcla0035</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0036.png">
+      <Name>Lily_DandoLaMezcla0036</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0037.png">
+      <Name>Lily_DandoLaMezcla0037</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0038.png">
+      <Name>Lily_DandoLaMezcla0038</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Player\Handing\Lily_DandoLaMezcla0039.png">
+      <Name>Lily_DandoLaMezcla0039</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Map\Interactive\Oven.png">
+      <Name>Oven</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

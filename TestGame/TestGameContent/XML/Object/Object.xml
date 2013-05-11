@@ -55,6 +55,15 @@
         </Value>
       </Item>
     </enemies>
+    <interactives>
+      <Item>
+        <Key>Oven</Key>
+        <Value>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
+        </Value>
+      </Item>
+    </interactives>
   </Asset>
 </XnaContent>
 

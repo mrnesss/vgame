@@ -1,6 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <XnaContent>
   <Asset Type="SharedContent.Map">
+    <background>Wall</background>
+    <interactives>
+      <Item>
+        <type>Oven</type>
+        <pos>1200 200</pos>
+      </Item>
+    </interactives>
+    <scenery>
+      <Item>
+        <type>Drawer</type>
+        <pos>800 100</pos>
+      </Item>
+      <Item>
+        <type>Stairs</type>
+        <pos>100 300</pos>
+      </Item>
+    </scenery>
     <platforms>
       <Item>
         <type>Platform</type>
@@ -42,7 +59,7 @@
     <items>
       <Item>
         <type>Milk</type>
-        <pos>200 400</pos>
+        <pos>100 400</pos>
       </Item>
       <Item>
         <type>Eggs</type>
@@ -50,6 +67,10 @@
       </Item>
       <Item>
         <type>Flour</type>
+        <pos>800 200</pos>
+      </Item>
+      <Item>
+        <type>Butter</type>
         <pos>800 200</pos>
       </Item>
     </items>
@@ -62,14 +83,26 @@
     <collectibles>
       <Item>
         <Key>Eggs</Key>
-        <Value>2</Value>
-      </Item>
-      <Item>
-        <Key>Flour</Key>
         <Value>1</Value>
       </Item>
       <Item>
+        <Key>Flour</Key>
+        <Value>2</Value>
+      </Item>
+      <Item>
         <Key>Milk</Key>
+        <Value>1</Value>
+      </Item>
+      <Item>
+        <Key>Vanilla</Key>
+        <Value>2</Value>
+      </Item>
+      <Item>
+        <Key>Butter</Key>
+        <Value>3</Value>
+      </Item>
+      <Item>
+        <Key>Sugar</Key>
         <Value>1</Value>
       </Item>
     </collectibles>

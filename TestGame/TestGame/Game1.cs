@@ -19,6 +19,7 @@ namespace TestGame
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
+        Song[] songs;
         TimeSpan elapsedGameTime;
         SpriteBatch spriteBatch;
         SpriteFont spriteFont;
@@ -35,17 +36,19 @@ namespace TestGame
         GameStateEnum gameState;
 
         Texture2D playerTexture;
-        int gameSpeed = 100;
+        int gameSpeed = (int)Math.Round(1000 / 24.0f);
         int elapsedTime = 0;
         string time;
         int blinkCounter;
-        bool blink;
+        bool blink, mute;
         Vector2 gravity;
         Vector2 friction;
 
         Dictionary<Enum, Texture2D> collectibleTextures = new Dictionary<Enum, Texture2D>();
         Dictionary<Enum, Texture2D> enemyTextures = new Dictionary<Enum, Texture2D>();
         Dictionary<Enum, Texture2D> mapTextures = new Dictionary<Enum, Texture2D>();
+        Dictionary<Enum, Texture2D> sceneryTextures = new Dictionary<Enum, Texture2D>();
+        Dictionary<Enum, Texture2D> interactiveTextures = new Dictionary<Enum, Texture2D>();
         Dictionary<Enum, Sprite> itemSprites = new Dictionary<Enum, Sprite>();
         Dictionary<Enum, Sprite> enemySprites = new Dictionary<Enum, Sprite>();
         Dictionary<Enum, Sprite> mapSprites = new Dictionary<Enum, Sprite>();
@@ -53,17 +56,22 @@ namespace TestGame
         List<GameObject> mapItems = new List<GameObject>();
         List<EnemyObject> mapEnemies = new List<EnemyObject>();
         List<MapObject> mapPlatforms = new List<MapObject>();
+        List<MapObject> mapScenery = new List<MapObject>();
+        List<MapObject> mapInteractives = new List<MapObject>();
 
         Texture2D cursor;
 
-        int width = 1000;
-        int height = 540;
-        int hudHeight = 60;
+        int width, height, hudHeight, totalHeight;
 
         public Game1()
         {
+            width = 1000;
+            height = 540;
+            hudHeight = 60;
+            totalHeight = height + hudHeight;
+
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferHeight = height + hudHeight;
+            graphics.PreferredBackBufferHeight = totalHeight;
             graphics.PreferredBackBufferWidth = width;
             Content.RootDirectory = "Content";
         }
@@ -77,12 +85,13 @@ namespace TestGame
         protected override void Initialize()
         {
             gameState = GameStateEnum.StartScreen;
-            viewport = new Viewport(-200, -200, 400, 400);
+            songs = new Song[3];
+            viewport = new Viewport(0, 0, 600, 600);
             kbs = new KeyboardState();
             friction = new Vector2(0.1f, 0.0f);
             gravity = new Vector2(0.0f, 7.0f);
 
-            player = new Player(PlayerSpriteEnum.Standing, new Vector2(700.0f, 350.0f), Direction.Left, 10.0f, 20.0f, new Vector2(0.1f, 0.0f));
+            player = new Player(PlayerSpriteEnum.Standing, new Vector2(700.0f, 350.0f), Direction.Left, 10.0f, 30.0f, new Vector2(0.1f, 0.0f));
 
             // Add player itemSprites to dictionary
             //player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 8, new Rectangle(0, 0, 71, 103), new Vector2(35.0f, 90.0f), 1.0f));
@@ -107,17 +116,24 @@ namespace TestGame
             string path;
             string filename;
 
+            // Load songs
+            songs[0] = Content.Load<Song>("Audio/Baron_Knoxburry");
+            songs[1] = Content.Load<Song>("Audio/Bit_Shifter");
+            songs[2] = Content.Load<Song>("Audio/Ggeir_Tjelta");
+
+            MediaPlayer.Volume = 0.0f;
+            MediaPlayer.Play(songs[2]);
+            MediaPlayer.IsRepeating = true;
+
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // Load font
             spriteFont = Content.Load<SpriteFont>("Font/Stanberry");
 
-            // Load background
-            background = Content.Load<Texture2D>("Texture/Map/Background/Background");
-
             // Load start screen
             startScreen = Content.Load<Texture2D>("Texture/Menu/Background/Start_Screen");
+            //startScreen = Content.Load<Texture2D>("Texture/Menu/Background/SC_Cool");
 
             // Load cover
             cover = Content.Load<Texture2D>("Texture/UI/Cover");
@@ -130,6 +146,7 @@ namespace TestGame
             // Load player textures
             foreach (String s in Enum.GetNames(typeof(PlayerSpriteEnum)))
             {
+                Vector2 origin;
                 path = "Texture/Player/" + s + "/";
                 dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
                 files = dir.GetFiles();
@@ -139,7 +156,17 @@ namespace TestGame
                     filename = e.Name.Split('.')[0];
                     textures.Add(Content.Load<Texture2D>(path + filename));
                 }
-                PlayerSprite sprite = new PlayerSprite((PlayerSpriteEnum)Enum.Parse(typeof(PlayerSpriteEnum), s), textures, new Vector2(textures.ElementAt(0).Width / 2, textures.ElementAt(0).Height));
+                origin = new Vector2(textures.ElementAt(0).Width / 2, textures.ElementAt(0).Height);
+                switch (s)
+                {
+                    case "Standing":
+                        origin.Y = 630.0f;
+                        break;
+                    case "Walking":
+                        origin.Y = 630.0f;
+                        break;
+                }
+                PlayerSprite sprite = new PlayerSprite((PlayerSpriteEnum)Enum.Parse(typeof(PlayerSpriteEnum), s), textures, origin);
                 player.AddSprite((PlayerSpriteEnum)sprite.id, sprite);
                 sprite.SetTextureData();
             }
@@ -174,22 +201,13 @@ namespace TestGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.P) && !kbs.GetPressedKeys().Contains(Keys.P))
-            {
-                if (gameState == GameStateEnum.Playing)
-                    gameState = GameStateEnum.Paused;
-                else if (gameState == GameStateEnum.Paused)
-                    gameState = GameStateEnum.Playing;
-            }
-            kbs = Keyboard.GetState();
-
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
             // Check pressed keys
             CheckKeyboardState();
-
+            kbs = Keyboard.GetState();
             time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", elapsedGameTime);
 
             //TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 250);
@@ -247,7 +265,32 @@ namespace TestGame
             map = Content.Load<Map>("XML/Map/Map_" + level);
             objectInfo = Content.Load<ObjectInfo>("XML/Object/Object");
 
-            // Load map textures
+            // Load background
+            background = Content.Load<Texture2D>("Texture/Map/Background/" + map.background);
+
+            // Load interactives textures
+            path = "Texture/Map/Interactive/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                if (map.GetInteractiveTypes().Contains(filename))
+                    interactiveTextures.Add((MapEnum)Enum.Parse(typeof(MapEnum), filename), Content.Load<Texture2D>(path + filename));
+            }
+
+            // Load map scenery textures
+            path = "Texture/Map/Scenery/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                if (map.GetSceneryTypes().Contains(filename))
+                    sceneryTextures.Add((MapEnum)Enum.Parse(typeof(MapEnum), filename), Content.Load<Texture2D>(path + filename));
+            }
+
+            // Load map platform textures
             path = "Texture/Map/Platform/";
             dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
             files = dir.GetFiles();
@@ -294,6 +337,22 @@ namespace TestGame
                 itemSprites.Add(i, new Sprite(i, collectibleTextures[i], objectInfo.collectibles[i].sprite.frames, rect, Vector2.Zero));
             }
 
+            // Add map platform sprites to list
+            foreach (String e in map.GetPlatformTypes())
+            {
+                MapEnum i = (MapEnum)Enum.Parse(typeof(MapEnum), e);
+                Rectangle rect = new Rectangle(0, 0, mapTextures[i].Width, mapTextures[i].Height);
+                mapSprites.Add(MapEnum.Platform, new Sprite(i, mapTextures[i], 1, mapTextures[i].Bounds, Vector2.Zero));
+            }
+
+            // Add map interactives sprites to list
+            foreach (String e in map.GetInteractiveTypes())
+            {
+                MapEnum i = (MapEnum)Enum.Parse(typeof(MapEnum), e);
+                Rectangle rect = new Rectangle(0, 0, interactiveTextures[i].Width / objectInfo.interactives[i].sprite.frames, interactiveTextures[i].Height);
+                mapSprites.Add(i, new Sprite(i, interactiveTextures[i], objectInfo.interactives[i].sprite.frames, rect, Vector2.Zero));
+            }
+
             // Add enemy sprites to dictionary
             foreach (String e in map.GetEnemyTypes())
             {
@@ -302,8 +361,9 @@ namespace TestGame
                 enemySprites.Add(i, new Sprite(i, enemyTextures[i], objectInfo.enemies[i].sprite.frames, rect, Vector2.Zero));
             }
 
-            // Add map sprites to list
-            mapSprites.Add(MapEnum.Platform, new Sprite(MapEnum.Platform, mapTextures[MapEnum.Platform], 1, mapTextures[MapEnum.Platform].Bounds, Vector2.Zero));
+            // Add map scenery to list
+            foreach(Map.Scenery e in map.scenery)
+                mapScenery.Add(new MapObject(sceneryTextures[e.type], e.pos));
 
             // Add items to list
             foreach (Map.Item e in map.items)
@@ -313,10 +373,16 @@ namespace TestGame
             foreach (Map.Enemy e in map.enemies)
                 mapEnemies.Add(new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed));
 
-            // Add map objects to list
+            // Add map platforms to list
             foreach (Map.Platform e in map.platforms)
             {
                 mapPlatforms.Add(new MapObject(mapSprites[e.type], e.pos));
+            }
+
+            // Add map interactives to list
+            foreach (Map.Interactive e in map.interactives)
+            {
+                mapInteractives.Add(new MapObject(mapSprites[e.type], e.pos));
             }
 
             // Add texture data to items
@@ -325,10 +391,40 @@ namespace TestGame
                 CollectibleEnum i = (CollectibleEnum)Enum.Parse(typeof(CollectibleEnum), e);
                 itemSprites[i].SetTextureData(itemSprites[i].texture);
             }
+
+            // Add texture data to enemies
+            foreach (String e in map.GetEnemyTypes())
+            {
+                EnemyEnum i = (EnemyEnum)Enum.Parse(typeof(EnemyEnum), e);
+                enemySprites[i].SetTextureData(enemySprites[i].texture);
+            }
+
+            // Add texture data to interactives
+            foreach (String e in map.GetInteractiveTypes())
+            {
+                MapEnum i = (MapEnum)Enum.Parse(typeof(MapEnum), e);
+                mapSprites[i].SetTextureData(mapSprites[i].texture);
+            }
         }
 
         void CheckKeyboardState()
         {
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.P) && !kbs.GetPressedKeys().Contains(Keys.P))
+            {
+                if (gameState == GameStateEnum.Playing)
+                    gameState = GameStateEnum.Paused;
+                else if (gameState == GameStateEnum.Paused)
+                    gameState = GameStateEnum.Playing;
+            }
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.M) && !kbs.GetPressedKeys().Contains(Keys.M))
+            {
+                mute ^= true;
+                if (mute)
+                    MediaPlayer.Volume = 0.0f;
+                else
+                    MediaPlayer.Volume = 0.3f;
+            }
+
             // Game started, currently playing
             if (gameState == GameStateEnum.Playing)
             {
@@ -463,10 +559,20 @@ namespace TestGame
 
         void DrawPlayingScreen()
         {
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation((int)(-player.pos.X + (width / 2)), (int)(-player.pos.Y + player.sprites[player.state].rect.Height + (height / 4)), 0.0f));
+            float scale = 0.25f;
 
             // Draw background
-            spriteBatch.Draw(background, Vector2.Zero, Color.White);
+            //spriteBatch.Begin();
+            //spriteBatch.Draw(background, Vector2.Zero, Color.White);
+            //spriteBatch.End();
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation((int)(-player.pos.X + (width / scale / 2)), (int)(-player.pos.Y + (height / scale / 1.25)), 0.0f) * Matrix.CreateScale(scale));
+
+            // Draw scenery
+            foreach (MapObject e in mapScenery)
+            {
+                spriteBatch.Draw(e.texture, e.pos, Color.White * e.alpha);
+            }
 
             // Draw platforms
             foreach (MapObject e in mapPlatforms)
@@ -478,8 +584,14 @@ namespace TestGame
             foreach (GameObject e in mapItems)
             {
                 e.sprite.rect.X = itemSprites[e.sprite.id].rect.Width * e.frame;
-                if (e.alive)
-                    spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha, 0.0f, Vector2.Zero, 0.25f, SpriteEffects.None, 0);
+                //if (e.alive)
+                    spriteBatch.Draw(e.sprite.texture, e.pos, Color.White * e.alpha);
+            }
+
+            // Draw interactives
+            foreach (MapObject e in mapInteractives)
+            {
+                spriteBatch.Draw(e.sprite.texture, e.pos, Color.White * e.alpha);
             }
 
             // Draw enemies
@@ -490,6 +602,18 @@ namespace TestGame
                     spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha);
             }
 
+            /*for (int j = 0; j < player.sprites[player.state].textures[0].Height; j++)
+            {
+                for (int i = 0; i < player.sprites[player.state].textures[0].Width; i++)
+                {
+                    if (player.sprites[player.state].GetTextureData(player.dir)[player.frame][(player.sprites[player.state].textures[0].Width * j) + i].A != 0)
+                    {
+                        //spriteBatch.Draw(cover, new Vector2(i+player.pos.X-player.sprites[player.state].origin.X, j+player.pos.Y-player.sprites[player.state].origin.Y), Color.White);
+                        spriteBatch.Draw(cover, new Vector2(i, j), Color.White);
+                    }
+                }
+            }*/
+
             spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             spriteBatch.End();
         }
@@ -499,8 +623,10 @@ namespace TestGame
             int x = 0;
             float scale = 1.0f;
             string pauseStr = "Pause";
+            string healthStr = "Health: " + player.GetHealth() + "%";
             spriteBatch.Begin();
-            spriteBatch.DrawString(spriteFont, time, new Vector2(0.0f, 0.0f), Color.White);
+            DrawString(spriteBatch, "Time: " + time, Vector2.Zero, 0.75f);
+            DrawString(spriteBatch, healthStr, new Vector2(width - spriteFont.MeasureString(healthStr).X * 0.75f, 0.0f), 0.75f);
             foreach (KeyValuePair<Enum, Sprite> i in itemSprites)
             {
                 string counter = itemCounter[(CollectibleEnum)i.Value.id].ToString();
@@ -510,30 +636,34 @@ namespace TestGame
                     spriteBatch.Draw(i.Value.texture, position, i.Value.rect, Color.White * 0.5f, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
                 else
                     spriteBatch.Draw(i.Value.texture, position, i.Value.rect, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
-                spriteBatch.DrawString(spriteFont, counter, new Vector2(x - spriteFont.MeasureString(counter).X + i.Value.rect.Width * scale, position.Y), Color.White);
+                DrawString(spriteBatch, counter, new Vector2(x - spriteFont.MeasureString(counter).X + i.Value.rect.Width * scale, position.Y), 1.0f);
                 x += (int)Math.Ceiling(i.Value.rect.Width * scale);
             }
             if (gameState == GameStateEnum.Paused)
             {
                 spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White);
-                spriteBatch.DrawString(spriteFont, pauseStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(pauseStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(pauseStr).Y / 2), Color.White);
+                DrawString(spriteBatch, pauseStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(pauseStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(pauseStr).Y / 2), 1.0f);
             }
+            DrawString(spriteBatch, str, new Vector2(0, 100), 1.0f);
             spriteBatch.End();
         }
 
         void DrawMainMenuScreen()
         {
             int d, y;
+            Vector2 scale;
+            scale.X = (float)width / startMenu.background.Width;
+            scale.Y = (float)totalHeight / startMenu.background.Height;
             d = (int)((height + hudHeight) * 0.6 / (startMenu.options.Count - 1));
             y = (int)((height + hudHeight) * 0.2);
             spriteBatch.Begin();
-            spriteBatch.Draw(startMenu.background, Vector2.Zero, Color.White);
+            spriteBatch.Draw(startMenu.background, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
             foreach (KeyValuePair<int, String> e in startMenu.options)
             {
-                if(e.Key == startMenu.selectedOption)
-                    spriteBatch.DrawString(spriteFont, e.Value, new Vector2(width / 2 - spriteFont.MeasureString(e.Value).X / 2, y - spriteFont.MeasureString(e.Value).Y / 2), Color.White, 0.0f, Vector2.Zero, 1.3f, SpriteEffects.None, 0);
+                if (e.Key == startMenu.selectedOption)
+                    DrawString(spriteBatch, e.Value, new Vector2(width / 2 - spriteFont.MeasureString(e.Value).X * 1.3f / 2, y - spriteFont.MeasureString(e.Value).Y * 1.3f / 2), 1.3f);
                 else
-                    spriteBatch.DrawString(spriteFont, e.Value, new Vector2(width / 2 - spriteFont.MeasureString(e.Value).X / 2, y - spriteFont.MeasureString(e.Value).Y / 2), Color.White);
+                    DrawString(spriteBatch, e.Value, new Vector2(width / 2 - spriteFont.MeasureString(e.Value).X / 2, y - spriteFont.MeasureString(e.Value).Y / 2), 1.0f);
                 y += d;
             }
             spriteBatch.End();
@@ -548,9 +678,12 @@ namespace TestGame
                 blink ^= true;
             }
             spriteBatch.Begin();
-            spriteBatch.Draw(startScreen, Vector2.Zero, Color.White);
+            Vector2 scale;
+            scale.X = (float)width / startScreen.Width;
+            scale.Y = (float)totalHeight / startScreen.Height;
+            spriteBatch.Draw(startScreen, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
             if (!blink)
-                spriteBatch.DrawString(spriteFont, startStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(startStr).X / 2, graphics.PreferredBackBufferHeight / 2), Color.White);
+                DrawString(spriteBatch, startStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(startStr).X / 2, graphics.PreferredBackBufferHeight / 2), 1.0f);
             spriteBatch.End();
         }
 
@@ -650,7 +783,7 @@ namespace TestGame
                 Rectangle itemRect = new Rectangle((int)(e.pos.X), (int)(e.pos.Y), e.sprite.rect.Width, e.sprite.rect.Height);
                 if (playerRect.Intersects(itemRect))
                 {
-                    if (IntersectPixels(playerRect, player.sprites[player.state].textureData[player.frame], itemRect, e.sprite.textureData[e.frame]) && e.alive)
+                    if (IntersectPixels(playerRect, player.sprites[player.state].GetTextureData(player.dir)[player.frame], itemRect, e.sprite.GetTextureData(1)[e.frame]) && e.alive)
                     {
                         e.collision = true;
                         e.alive = false;
@@ -661,7 +794,25 @@ namespace TestGame
                         e.collision = false;
                     }
                 }
-                //e.UpdateCollision();
+            }
+            mapItems.RemoveAll(p => p.alive == false);
+
+            // Collision with enemies
+            foreach (EnemyObject e in mapEnemies)
+            {
+                Rectangle enemyRect = new Rectangle((int)(e.pos.X), (int)(e.pos.Y), e.sprite.rect.Width, e.sprite.rect.Height);
+                if (IntersectPixels(playerRect, player.sprites[player.state].GetTextureData(player.dir)[player.frame], enemyRect, e.sprite.GetTextureData(e.dir)[e.frame]) && e.alive)
+                {
+                    e.collision = true;
+                    if (player.pos.Y > e.pos.Y)
+                        player.SetHealth(-1.0f);
+                    else e.alive = false;
+                }
+                else
+                {
+                    e.collision = false;
+                }
+                //str = player.pos.ToString() + " " + e.pos.ToString();
             }
 
             // Collision with map platforms
@@ -673,10 +824,6 @@ namespace TestGame
                     Rectangle objectRect = new Rectangle((int)m.pos.X, (int)m.pos.Y, m.sprite.rect.Width, 1/*m.sprite.rect.Height*/);
                     if (player.Collided(objectRect))
                         player.isFalling = false;
-                    /*str = player.GetJump() + " " + Math.Abs(player.prevPos.Y - player.pos.Y) +
-                        "\nPlatform L:" + objectRect.Left + " R:" + objectRect.Right + " T:" + objectRect.Top + " B:" + objectRect.Bottom +
-                        "\nPlayer   " + player.test +
-                        "\nPosition" + player.pos;*/
                     if (!player.isFalling)
                     {
                         player.isJumping = false;
@@ -685,6 +832,20 @@ namespace TestGame
                         player.ResetJump();
                         break;
                     }
+                }
+            }
+
+            // Collision with map interactives
+            foreach (MapObject e in mapInteractives)
+            {
+                Rectangle interactiveRect = new Rectangle((int)(e.pos.X), (int)(e.pos.Y), e.sprite.rect.Width, e.sprite.rect.Height);
+                if (IntersectPixels(playerRect, player.sprites[player.state].GetTextureData(player.dir)[player.frame], interactiveRect, e.sprite.GetTextureData(1)[e.frame]))
+                {
+                    str = e.sprite.id.ToString();
+                }
+                else
+                {
+                    str = "NOPE, CHUCK TESTA";
                 }
             }
         }
@@ -737,6 +898,15 @@ namespace TestGame
  
             // No intersection found
             return false;
+        }
+
+        void DrawString(SpriteBatch spriteBatch, String s, Vector2 pos, float scale)
+        {
+            spriteBatch.DrawString(spriteFont, s, new Vector2(pos.X - 1, pos.Y), Color.Black, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
+            spriteBatch.DrawString(spriteFont, s, new Vector2(pos.X + 1, pos.Y), Color.Black, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
+            spriteBatch.DrawString(spriteFont, s, new Vector2(pos.X, pos.Y - 1), Color.Black, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
+            spriteBatch.DrawString(spriteFont, s, new Vector2(pos.X, pos.Y + 1), Color.Black, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
+            spriteBatch.DrawString(spriteFont, s, pos, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
         }
     }
 }

@@ -10,5 +10,6 @@ namespace SharedContent
     {
         public Dictionary<CollectibleEnum, GameObject> collectibles;
         public Dictionary<EnemyEnum, EnemyObject> enemies;
+        public Dictionary<MapEnum, MapObject> interactives;
     }
 }
