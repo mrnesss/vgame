@@ -14,6 +14,8 @@ namespace SharedContent
         public Enum id;
         [ContentSerializerIgnore]
         public Texture2D texture;
+        [ContentSerializerIgnore]
+        public List<Texture2D> textures;
         public int frames;
         [ContentSerializerIgnore]
         public Rectangle rect;
@@ -25,6 +27,17 @@ namespace SharedContent
         public Sprite()
         {
             
+        }
+
+        public Sprite(Enum id, List<Texture2D> textures, int frames, Rectangle rect, Vector2 origin)
+        {
+            this.id = id;
+            this.textures = textures;
+            this.frames = frames;
+            this.rect = rect;
+            this.origin = origin;
+            textureData1 = new Color[frames][];
+            textureData2 = new Color[frames][];
         }
 
         public Sprite(Enum id, Texture2D texture, int frames, Rectangle rect, Vector2 origin)
@@ -44,6 +57,12 @@ namespace SharedContent
             SetTextureData2();
         }
 
+        public void SetTextureData(List<Texture2D> textures)
+        {
+            SetTextureData1(textures);
+            SetTextureData2();
+        }
+
         public Color[][] GetTextureData(byte dir)
         {
             if (dir == 1)
@@ -58,6 +77,15 @@ namespace SharedContent
             {
                 textureData1[i] = new Color[rect.Width * rect.Height];
                 texture.GetData(0, new Rectangle(rect.Width * i, rect.Y, rect.Width, rect.Height), textureData1[i], 0, rect.Width * rect.Height);
+            }
+        }
+
+        private void SetTextureData1(List<Texture2D> textures)
+        {
+            for (int i = 0; i < frames; i++)
+            {
+                textureData1[i] = new Color[rect.Width * rect.Height];
+                textures.ElementAt(i).GetData<Color>(textureData1[i], 0, textureData1[i].Length);
             }
         }
 

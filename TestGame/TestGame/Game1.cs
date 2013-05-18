@@ -32,27 +32,31 @@ namespace TestGame
         LevelMenu levelMenu;
         StartMenu startMenu;
 
+        Random random;
         Player player;
+        Chef chef;
         GameStateEnum gameState;
 
-        Texture2D playerTexture;
+        Point collisionPoint;
         int gameSpeed = (int)Math.Round(1000 / 24.0f);
         int elapsedTime = 0;
+        int points;
         string time;
         int blinkCounter;
+        float volume = 0.0f;
         bool blink, mute;
         Vector2 gravity;
         Vector2 friction;
 
         Dictionary<Enum, Texture2D> collectibleTextures = new Dictionary<Enum, Texture2D>();
-        Dictionary<Enum, Texture2D> enemyTextures = new Dictionary<Enum, Texture2D>();
+        Dictionary<Enum, List<Texture2D>> enemyTextures = new Dictionary<Enum, List<Texture2D>>();
         Dictionary<Enum, Texture2D> mapTextures = new Dictionary<Enum, Texture2D>();
         Dictionary<Enum, Texture2D> sceneryTextures = new Dictionary<Enum, Texture2D>();
         Dictionary<Enum, Texture2D> interactiveTextures = new Dictionary<Enum, Texture2D>();
         Dictionary<Enum, Sprite> itemSprites = new Dictionary<Enum, Sprite>();
         Dictionary<Enum, Sprite> enemySprites = new Dictionary<Enum, Sprite>();
         Dictionary<Enum, Sprite> mapSprites = new Dictionary<Enum, Sprite>();
-        Dictionary<CollectibleEnum, int> itemCounter = new Dictionary<CollectibleEnum, int>();
+        Dictionary<CollectibleEnum, int[]> itemCounter = new Dictionary<CollectibleEnum, int[]>();
         List<GameObject> mapItems = new List<GameObject>();
         List<EnemyObject> mapEnemies = new List<EnemyObject>();
         List<MapObject> mapPlatforms = new List<MapObject>();
@@ -69,6 +73,7 @@ namespace TestGame
             height = 540;
             hudHeight = 60;
             totalHeight = height + hudHeight;
+            random = new Random((int)DateTime.Now.ToFileTime());
 
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferHeight = totalHeight;
@@ -88,18 +93,11 @@ namespace TestGame
             songs = new Song[3];
             viewport = new Viewport(0, 0, 600, 600);
             kbs = new KeyboardState();
-            friction = new Vector2(0.1f, 0.0f);
-            gravity = new Vector2(0.0f, 7.0f);
+            friction = new Vector2(0.3f, 0.0f);
+            gravity = new Vector2(0.0f, 20.0f);
 
-            player = new Player(PlayerSpriteEnum.Standing, new Vector2(700.0f, 350.0f), Direction.Left, 10.0f, 30.0f, new Vector2(0.1f, 0.0f));
-
-            // Add player itemSprites to dictionary
-            //player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 8, new Rectangle(0, 0, 71, 103), new Vector2(35.0f, 90.0f), 1.0f));
-            //player.AddSprite(PlayerSpriteEnum.Walking, new PlayerSprite(PlayerSpriteEnum.Walking, 8, new Rectangle(0, 103, 65, 103), new Vector2(32.0f, 103.0f), 5.5f));
-            //player.AddSprite(PlayerSpriteEnum.Jumping, new PlayerSprite(PlayerSpriteEnum.Jumping, 1, new Rectangle(0, 206, 76, 103), new Vector2(38.0f, 103.0f), 1.0f));
-            //player.AddSprite(PlayerSpriteEnum.Standing, new PlayerSprite(PlayerSpriteEnum.Standing, 14, new Rectangle(0, 0, 146, 280), new Vector2(72.5f, 170.0f), 1.0f));
-            //player.AddSprite(PlayerSpriteEnum.Walking, new PlayerSprite(PlayerSpriteEnum.Walking, 14, new Rectangle(0, 0, 146, 280), new Vector2(72.5f, 170.0f), 5.5f));
-            //player.AddSprite(PlayerSpriteEnum.Jumping, new PlayerSprite(PlayerSpriteEnum.Jumping, 14, new Rectangle(0, 0, 146, 280), new Vector2(72.5f, 170.0f), 1.0f));
+            player = new Player(PlayerSpriteEnum.Standing, Vector2.Zero, Direction.Left, 25.0f, 65.0f, new Vector2(0.3f, 0.0f));
+            chef = new Chef(ChefSpriteEnum.Standing, new Vector2(0.0f, -1000.0f), Direction.Left, 8.0f);
 
             base.Initialize();
         }
@@ -121,7 +119,7 @@ namespace TestGame
             songs[1] = Content.Load<Song>("Audio/Bit_Shifter");
             songs[2] = Content.Load<Song>("Audio/Ggeir_Tjelta");
 
-            MediaPlayer.Volume = 0.0f;
+            MediaPlayer.Volume = volume;
             MediaPlayer.Play(songs[2]);
             MediaPlayer.IsRepeating = true;
 
@@ -165,14 +163,48 @@ namespace TestGame
                     case "Walking":
                         origin.Y = 630.0f;
                         break;
+                    case "Handing":
+                        origin.X = 195.0f;
+                        origin.Y = 630.0f;
+                        break;
+                    case "Dying":
+                        origin.Y = 655.0f;
+                        break;
+                    case "Jumping":
+                        origin.Y = 620.0f;
+                        break;
                 }
-                PlayerSprite sprite = new PlayerSprite((PlayerSpriteEnum)Enum.Parse(typeof(PlayerSpriteEnum), s), textures, origin);
+                CharacterSprite sprite = new CharacterSprite((PlayerSpriteEnum)Enum.Parse(typeof(PlayerSpriteEnum), s), textures, origin);
                 player.AddSprite((PlayerSpriteEnum)sprite.id, sprite);
                 sprite.SetTextureData();
             }
-            
-            //playerTexture = Content.Load<Texture2D>("Texture/Player/Sprites");
-            playerTexture = Content.Load<Texture2D>("Texture/Player/lilicamin2");
+
+            // Load chef textures
+            foreach (String s in Enum.GetNames(typeof(ChefSpriteEnum)))
+            {
+                path = "Texture/Chef/" + s + "/";
+                dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+                files = dir.GetFiles();
+                textures = new List<Texture2D>();
+                foreach (FileInfo e in files)
+                {
+                    filename = e.Name.Split('.')[0];
+                    textures.Add(Content.Load<Texture2D>(path + filename));
+                }
+                CharacterSprite sprite = new CharacterSprite((ChefSpriteEnum)Enum.Parse(typeof(ChefSpriteEnum), s), textures, Vector2.Zero);
+                chef.AddSprite((ChefSpriteEnum)sprite.id, sprite);
+                sprite.SetTextureData();
+            }
+
+            // Load interactives textures
+            path = "Texture/Map/Interactive/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                interactiveTextures.Add((MapEnum)Enum.Parse(typeof(MapEnum), filename), Content.Load<Texture2D>(path + filename));
+            }
 
             // Load start menu
             startMenu = Content.Load<StartMenu>("XML/Menu/Start_Menu");
@@ -183,6 +215,9 @@ namespace TestGame
             levelMenu.background = Content.Load<Texture2D>("Texture/Menu/Background/" + levelMenu.bg);
 
             cursor = Content.Load<Texture2D>("Texture/cursor");
+
+            // Set player starting position
+            player.SetPosition(levelMenu.positions[0]);
         }
 
         /// <summary>
@@ -208,7 +243,12 @@ namespace TestGame
             // Check pressed keys
             CheckKeyboardState();
             kbs = Keyboard.GetState();
+
+            // Set elapsed time
             time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", elapsedGameTime);
+
+            // Set volume
+            MediaPlayer.Volume = volume;
 
             //TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 250);
             //IsFixedTimeStep = true;
@@ -236,11 +276,58 @@ namespace TestGame
                     i.UpdatePosition();
                 }
 
+                // Update interactives position
+                foreach (MapObject e in mapInteractives)
+                {
+                    e.UpdatePosition(map.rect.Height);
+                }
+
+                // Makes the chef appear randomly
+                if (chef.canAppear && random.NextDouble() > 0.9965f)
+                {
+                    chef.isAppearing = true;
+                    chef.canAppear = false;
+                }
+
+                // Update chef animation and position
+                UpdateChefAnimation();
+                UpdateChefPosition();
+
                 // Update game enemies animation / state
                 foreach (EnemyObject e in mapEnemies)
                 {
                     e.UpdateAnimation(gameTime.ElapsedGameTime.Milliseconds);
-                    e.UpdatePosition(gravity, player.pos);
+                    e.UpdatePosition(gravity, player.pos, player.sprites[player.state].rect);
+                }
+
+                // Update player invincibility frames
+                player.UpdateInvincibility(gameTime.ElapsedGameTime.Milliseconds);
+
+                // Check if all the ingredients were picked up
+                if (itemCounter.All(p => p.Value.ElementAt(1) == 0))
+                    map.isCompleted = true;
+
+                // Update if player died
+                if (player.health <= 0.0f)
+                {
+                    player.isAlive = false;
+                    player.SetVelocity(Vector2.Zero);
+                }
+
+                // Remove interactives
+                mapInteractives.RemoveAll(p => p.isAlive == false);
+
+                // Wait for animation to end to show game over screen
+                if (!player.isAlive && player.frame == player.sprites[player.state].frames - 1)
+                {
+                    gameState = GameStateEnum.GameOver;
+                }
+
+                // Wait for animation to end to show level completed screen
+                if (player.state == PlayerSpriteEnum.Handing && player.frame == player.sprites[player.state].frames - 1)
+                {
+                    points = (int)(((map.time - elapsedGameTime > TimeSpan.Zero)? map.time - elapsedGameTime : TimeSpan.Zero).TotalMilliseconds / 100 * player.GetHealth());
+                    gameState = GameStateEnum.LevelCompleted;
                 }
 
                 // Update game time
@@ -261,14 +348,23 @@ namespace TestGame
             string path;
             string filename;
 
+            MediaPlayer.Play(songs[1]);
+
             // Load XML info
             map = Content.Load<Map>("XML/Map/Map_" + level);
             objectInfo = Content.Load<ObjectInfo>("XML/Object/Object");
 
+            // Set player starting position
+            player.SetStartingPosition(map.startPos);
+            player.dir = Direction.Right;
+
+            // Set chef starting position
+            chef.SetStartingPosition(new Vector2(0.0f, -chef.sprites[chef.state].rect.Height));
+
             // Load background
             background = Content.Load<Texture2D>("Texture/Map/Background/" + map.background);
 
-            // Load interactives textures
+            /*// Load interactives textures
             path = "Texture/Map/Interactive/";
             dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
             files = dir.GetFiles();
@@ -277,7 +373,7 @@ namespace TestGame
                 filename = e.Name.Split('.')[0];
                 if (map.GetInteractiveTypes().Contains(filename))
                     interactiveTextures.Add((MapEnum)Enum.Parse(typeof(MapEnum), filename), Content.Load<Texture2D>(path + filename));
-            }
+            }*/
 
             // Load map scenery textures
             path = "Texture/Map/Scenery/";
@@ -313,7 +409,21 @@ namespace TestGame
             }
 
             // Load enemies textures
-            path = "Texture/Enemy/";
+            foreach (String s in map.GetEnemyTypes())
+            {
+                path = "Texture/Enemy/" + s + "/";
+                dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+                files = dir.GetFiles();
+                List<Texture2D> textures = new List<Texture2D>();
+                foreach (FileInfo e in files)
+                {
+                    filename = e.Name.Split('.')[0];
+                    textures.Add(Content.Load<Texture2D>(path + filename));
+                }
+                enemyTextures.Add((EnemyEnum)Enum.Parse(typeof(EnemyEnum), s), textures);
+            }
+
+            /*path = "Texture/Enemy/";
             dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
             files = dir.GetFiles();
             foreach (FileInfo e in files)
@@ -321,7 +431,7 @@ namespace TestGame
                 filename = e.Name.Split('.')[0];
                 if (map.GetEnemyTypes().Contains(filename))
                     enemyTextures.Add((EnemyEnum)Enum.Parse(typeof(EnemyEnum), filename), Content.Load<Texture2D>(path + filename));
-            }
+            }*/
         }
 
         void InitializeLevel()
@@ -337,7 +447,15 @@ namespace TestGame
                 itemSprites.Add(i, new Sprite(i, collectibleTextures[i], objectInfo.collectibles[i].sprite.frames, rect, Vector2.Zero));
             }
 
-            // Add map platform sprites to list
+            // Add map interactives sprites to dictionary
+            foreach (KeyValuePair<MapEnum, MapObject> e in objectInfo.interactives)
+            {
+                MapEnum i = e.Key;
+                Rectangle rect = new Rectangle(0, 0, interactiveTextures[i].Width / objectInfo.interactives[i].sprite.frames, interactiveTextures[i].Height);
+                mapSprites.Add(i, new Sprite(i, interactiveTextures[i], objectInfo.interactives[i].sprite.frames, rect, Vector2.Zero));
+            }
+
+            // Add map platform sprites to dictionary
             foreach (String e in map.GetPlatformTypes())
             {
                 MapEnum i = (MapEnum)Enum.Parse(typeof(MapEnum), e);
@@ -345,19 +463,11 @@ namespace TestGame
                 mapSprites.Add(MapEnum.Platform, new Sprite(i, mapTextures[i], 1, mapTextures[i].Bounds, Vector2.Zero));
             }
 
-            // Add map interactives sprites to list
-            foreach (String e in map.GetInteractiveTypes())
-            {
-                MapEnum i = (MapEnum)Enum.Parse(typeof(MapEnum), e);
-                Rectangle rect = new Rectangle(0, 0, interactiveTextures[i].Width / objectInfo.interactives[i].sprite.frames, interactiveTextures[i].Height);
-                mapSprites.Add(i, new Sprite(i, interactiveTextures[i], objectInfo.interactives[i].sprite.frames, rect, Vector2.Zero));
-            }
-
             // Add enemy sprites to dictionary
             foreach (String e in map.GetEnemyTypes())
             {
                 EnemyEnum i = (EnemyEnum)Enum.Parse(typeof(EnemyEnum), e);
-                Rectangle rect = new Rectangle(0, 0, enemyTextures[i].Width / objectInfo.enemies[i].sprite.frames, enemyTextures[i].Height);
+                Rectangle rect = new Rectangle(0, 0, enemyTextures[i].ElementAt(0).Width, enemyTextures[i].ElementAt(0).Height);
                 enemySprites.Add(i, new Sprite(i, enemyTextures[i], objectInfo.enemies[i].sprite.frames, rect, Vector2.Zero));
             }
 
@@ -367,11 +477,19 @@ namespace TestGame
 
             // Add items to list
             foreach (Map.Item e in map.items)
-                mapItems.Add(new GameObject(itemSprites[e.type], e.pos, objectInfo.collectibles[e.type].updateTime));
+            {
+                GameObject item = new GameObject(itemSprites[e.type], e.pos, objectInfo.collectibles[e.type].updateTime);
+                mapItems.Add(item);
+                item.Initialize();
+            }
 
-            // Add enemies to list
+            // Add enemies to list and initialize them
             foreach (Map.Enemy e in map.enemies)
-                mapEnemies.Add(new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed));
+            {
+                EnemyObject enemy = new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed, objectInfo.enemies[e.type].damage);
+                mapEnemies.Add(enemy);
+                enemy.Initialize();
+            }
 
             // Add map platforms to list
             foreach (Map.Platform e in map.platforms)
@@ -396,19 +514,50 @@ namespace TestGame
             foreach (String e in map.GetEnemyTypes())
             {
                 EnemyEnum i = (EnemyEnum)Enum.Parse(typeof(EnemyEnum), e);
-                enemySprites[i].SetTextureData(enemySprites[i].texture);
+                enemySprites[i].SetTextureData(enemyTextures[i]);
             }
 
             // Add texture data to interactives
-            foreach (String e in map.GetInteractiveTypes())
+            foreach (KeyValuePair<MapEnum, MapObject> e in objectInfo.interactives)
             {
-                MapEnum i = (MapEnum)Enum.Parse(typeof(MapEnum), e);
+                MapEnum i = e.Key;
                 mapSprites[i].SetTextureData(mapSprites[i].texture);
             }
         }
 
+        void RestartLevel()
+        {
+            // Reset map state
+            map.isCompleted = false;
+
+            // Reset items counter
+            foreach (KeyValuePair<CollectibleEnum, int[]> e in itemCounter)
+                e.Value[1] = e.Value[0];
+
+            // Reset game items state
+            foreach (GameObject e in mapItems)
+                e.Initialize();
+
+            // Reset enemies state
+            foreach (EnemyObject e in mapEnemies)
+                e.Initialize();
+
+            // Reset player state
+            player.Initialize();
+
+            // Reset chef state
+            chef.Initialize();
+
+            // Reset game state
+            gameState = GameStateEnum.Playing;
+
+            // Reset time to zero
+            elapsedGameTime = TimeSpan.Zero;
+        }
+
         void CheckKeyboardState()
         {
+            // Pause
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.P) && !kbs.GetPressedKeys().Contains(Keys.P))
             {
                 if (gameState == GameStateEnum.Playing)
@@ -416,17 +565,41 @@ namespace TestGame
                 else if (gameState == GameStateEnum.Paused)
                     gameState = GameStateEnum.Playing;
             }
+
+            // Mute
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.M) && !kbs.GetPressedKeys().Contains(Keys.M))
             {
                 mute ^= true;
                 if (mute)
                     MediaPlayer.Volume = 0.0f;
                 else
-                    MediaPlayer.Volume = 0.3f;
+                    MediaPlayer.Volume = volume;
+            }
+
+            // Volume
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Add))
+            {
+                volume += 0.002f;
+                if (volume > 1.0f)
+                    volume = 1.0f;
+            }
+
+            // Volume
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Subtract))
+            {
+                volume -= 0.002f;
+                if (volume < 0.0f)
+                    volume = 0.0f;
+            }
+
+            // Restart level
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.R) && !kbs.GetPressedKeys().Contains(Keys.R))
+            {
+                RestartLevel();
             }
 
             // Game started, currently playing
-            if (gameState == GameStateEnum.Playing)
+            if (gameState == GameStateEnum.Playing && player.isAlive && player.state != PlayerSpriteEnum.Handing)
             {
                 foreach (Keys key in kbs.GetPressedKeys())
                 {
@@ -458,13 +631,10 @@ namespace TestGame
                         case Keys.S:
                             str = "Down";
                             break;
-                        case Keys.Space:
-                            player.pos.X = Mouse.GetState().X;
-                            player.pos.Y = Mouse.GetState().Y;
-                            break;
                     }
                 }
             }
+
             // Game hasn't started, main menu screen
             else if (gameState == GameStateEnum.MainMenu)
             {
@@ -480,6 +650,14 @@ namespace TestGame
                     {
                         case "Start":
                             gameState = GameStateEnum.LevelSelection;
+                            break;
+                        case "Instructions":
+                            break;
+                        case "Map":
+                            break;
+                        case "Minigames":
+                            break;
+                        case "About":
                             break;
                     }
                 }
@@ -499,6 +677,7 @@ namespace TestGame
                     LoadLevel(player.GetLevel() + 1);
                     InitializeLevel();
                     player.Initialize();
+                    chef.Initialize();
                     gameState = GameStateEnum.Playing;
                     elapsedGameTime = TimeSpan.Zero;
                 }
@@ -521,7 +700,7 @@ namespace TestGame
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            if (gameState == GameStateEnum.Playing || gameState == GameStateEnum.Paused)
+            if (gameState == GameStateEnum.Playing || gameState == GameStateEnum.Paused || gameState == GameStateEnum.GameOver || gameState == GameStateEnum.LevelCompleted)
             {
                 DrawPlayingScreen();
                 DrawHUD();
@@ -539,10 +718,15 @@ namespace TestGame
                 blinkCounter += gameTime.ElapsedGameTime.Milliseconds;
                 DrawStartScreen();
             }
+            if (gameState == GameStateEnum.GameOver)
+            {
+                blinkCounter += gameTime.ElapsedGameTime.Milliseconds;
+            }
 
             // Draw cursor
             spriteBatch.Begin();
-            spriteBatch.Draw(cursor, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
+            //spriteBatch.Draw(cursor, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
+            //spriteBatch.Draw(cursor, new Vector2(0.0f, (player.GetPosition().Y * 0.25f)), Color.White);
             //spriteBatch.DrawString(spriteFont, gameTime.TotalGameTime.ToString(), new Vector2(100.0f, 100.0f), Color.White);
             spriteBatch.End();
 
@@ -551,22 +735,44 @@ namespace TestGame
 
         void DrawLevelSelection()
         {
+            float scale = 0.375f;
             spriteBatch.Begin();
             spriteBatch.Draw(levelMenu.background, Vector2.Zero, Color.White);
-            spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateScale(scale));
+            spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             spriteBatch.End();
         }
 
         void DrawPlayingScreen()
         {
             float scale = 0.25f;
+            Matrix translationMatrix = Matrix.CreateTranslation(0.0f, 0.0f, 0.0f);
 
             // Draw background
-            //spriteBatch.Begin();
-            //spriteBatch.Draw(background, Vector2.Zero, Color.White);
-            //spriteBatch.End();
+            spriteBatch.Begin();
+            spriteBatch.Draw(background, Vector2.Zero, Color.White);
+            spriteBatch.End();
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation((int)(-player.pos.X + (width / scale / 2)), (int)(-player.pos.Y + (height / scale / 1.25)), 0.0f) * Matrix.CreateScale(scale));
+            #region Translation matrix settings
+            // X settings
+            if (player.GetPosition().X - (width / scale / 2) <= 0)
+                translationMatrix.M41 = 0.0f;
+            else if (player.GetPosition().X + (width / scale / 2) >= map.rect.Width)
+                translationMatrix.M41 = (int)((-map.rect.Width) + (width / scale));
+            else
+                translationMatrix.M41 = (int)(-player.GetPosition().X + (width / scale / 2));
+
+            // Y settings
+            if (player.GetPosition().Y - (height / scale / 1.15) <= 0)
+                translationMatrix.M42 = 0.0f;
+            else if (player.GetPosition().Y + (height / scale / 3) >= map.rect.Height)
+                translationMatrix.M42 = (int)((-map.rect.Height) + (height / scale));
+            else
+                translationMatrix.M42 = (int)(-player.GetPosition().Y + (height / scale / 1.15));
+            #endregion
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, translationMatrix * Matrix.CreateScale(scale));
 
             // Draw scenery
             foreach (MapObject e in mapScenery)
@@ -584,7 +790,7 @@ namespace TestGame
             foreach (GameObject e in mapItems)
             {
                 e.sprite.rect.X = itemSprites[e.sprite.id].rect.Width * e.frame;
-                //if (e.alive)
+                if (e.isAlive)
                     spriteBatch.Draw(e.sprite.texture, e.pos, Color.White * e.alpha);
             }
 
@@ -595,12 +801,14 @@ namespace TestGame
             }
 
             // Draw enemies
-            foreach (GameObject e in mapEnemies)
+            foreach (EnemyObject e in mapEnemies)
             {
-                e.sprite.rect.X = enemySprites[e.sprite.id].rect.Width * e.frame;
-                if (e.alive)
-                    spriteBatch.Draw(e.sprite.texture, e.pos, e.sprite.rect, Color.White * e.alpha);
+                if (e.isAlive)
+                    spriteBatch.Draw(e.sprite.textures.ElementAt(e.frame), e.pos, e.sprite.rect, Color.White, 0.0f, Vector2.Zero, 1.0f, (e.dir == 1) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0);
             }
+
+            // Draw chef
+            spriteBatch.Draw(chef.sprites[chef.state].textures.ElementAt(chef.frame), new Vector2((width / scale) - translationMatrix.M41 - chef.sprites[chef.state].rect.Width, chef.pos.Y - translationMatrix.M42), chef.sprites[chef.state].rect, Color.White, 0.0f, chef.sprites[chef.state].origin, 1.0f, (chef.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
 
             /*for (int j = 0; j < player.sprites[player.state].textures[0].Height; j++)
             {
@@ -608,13 +816,19 @@ namespace TestGame
                 {
                     if (player.sprites[player.state].GetTextureData(player.dir)[player.frame][(player.sprites[player.state].textures[0].Width * j) + i].A != 0)
                     {
-                        //spriteBatch.Draw(cover, new Vector2(i+player.pos.X-player.sprites[player.state].origin.X, j+player.pos.Y-player.sprites[player.state].origin.Y), Color.White);
+                        //spriteBatch.Draw(cover, new Vector2(i+player.GetPosition().X-player.sprites[player.state].origin.X, j+player.GetPosition().Y-player.sprites[player.state].origin.Y), Color.White);
                         spriteBatch.Draw(cover, new Vector2(i, j), Color.White);
                     }
                 }
             }*/
-
-            spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.pos.X, (int)player.pos.Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            if (player.blink)
+                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, Color.White * 0.5f, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            else
+                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X, mapEnemies.ElementAt(0).pos.Y), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
+            //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X, mapEnemies.ElementAt(0).pos.Y + mapEnemies.ElementAt(0).sprite.rect.Height), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
+            //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X + mapEnemies.ElementAt(0).sprite.rect.Width, mapEnemies.ElementAt(0).pos.Y), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
+            //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X + mapEnemies.ElementAt(0).sprite.rect.Width, mapEnemies.ElementAt(0).pos.Y + mapEnemies.ElementAt(0).sprite.rect.Height), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
             spriteBatch.End();
         }
 
@@ -622,29 +836,63 @@ namespace TestGame
         {
             int x = 0;
             float scale = 1.0f;
+            float itemsWidth = 0.0f;
+            foreach (KeyValuePair<Enum, Sprite> e in itemSprites)
+            {
+                scale = hudHeight * 0.75f / e.Value.rect.Height;
+                itemsWidth += e.Value.rect.Width * scale;
+            }
+            itemsWidth /= 2.0f;
+            x = (int)(- itemsWidth + width / 2);
             string pauseStr = "Pause";
+            string gameOverStr = "Game over";
+            string levelCompletedStr = "Level completed!";
             string healthStr = "Health: " + player.GetHealth() + "%";
             spriteBatch.Begin();
-            DrawString(spriteBatch, "Time: " + time, Vector2.Zero, 0.75f);
-            DrawString(spriteBatch, healthStr, new Vector2(width - spriteFont.MeasureString(healthStr).X * 0.75f, 0.0f), 0.75f);
-            foreach (KeyValuePair<Enum, Sprite> i in itemSprites)
+            DrawString(spriteBatch, "Time: " + time, new Vector2(width / 2 - spriteFont.MeasureString("Time: 0.00").X / 2, 0.0f), 0.75f);
+            DrawString(spriteBatch, healthStr, Vector2.Zero, 0.75f);
+
+            // Draw items needed
+            foreach (KeyValuePair<Enum, Sprite> e in itemSprites)
             {
-                string counter = itemCounter[(CollectibleEnum)i.Value.id].ToString();
-                scale = hudHeight * 0.75f / i.Value.rect.Height;
+                string counter = itemCounter[(CollectibleEnum)e.Value.id][1].ToString();
                 Vector2 position = new Vector2(x, graphics.PreferredBackBufferHeight - hudHeight * 0.9f);
-                if (itemCounter[(CollectibleEnum)i.Value.id] <= 0)
-                    spriteBatch.Draw(i.Value.texture, position, i.Value.rect, Color.White * 0.5f, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
+                scale = hudHeight * 0.75f / e.Value.rect.Height;
+                if (itemCounter[(CollectibleEnum)e.Value.id][1] == 0)
+                    spriteBatch.Draw(e.Value.texture, position, e.Value.rect, Color.White * 0.5f, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
                 else
-                    spriteBatch.Draw(i.Value.texture, position, i.Value.rect, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
-                DrawString(spriteBatch, counter, new Vector2(x - spriteFont.MeasureString(counter).X + i.Value.rect.Width * scale, position.Y), 1.0f);
-                x += (int)Math.Ceiling(i.Value.rect.Width * scale);
+                    spriteBatch.Draw(e.Value.texture, position, e.Value.rect, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
+                DrawString(spriteBatch, counter, new Vector2(x - spriteFont.MeasureString(counter).X + e.Value.rect.Width * scale, position.Y), 1.0f);
+                x += (int)(Math.Ceiling(e.Value.rect.Width * scale));
             }
+
+            // Game paused
             if (gameState == GameStateEnum.Paused)
             {
-                spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White);
+                spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
                 DrawString(spriteBatch, pauseStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(pauseStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(pauseStr).Y / 2), 1.0f);
             }
-            DrawString(spriteBatch, str, new Vector2(0, 100), 1.0f);
+            // Game over
+            else if (gameState == GameStateEnum.GameOver)
+            {
+                string restartStr = "Press R to restart the level";
+                if (blinkCounter > 750)
+                {
+                    blinkCounter = 0;
+                    blink ^= true;
+                }
+                spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White);
+                if (!blink)
+                    DrawString(spriteBatch, restartStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(restartStr).X / 2, graphics.PreferredBackBufferHeight / 2 + spriteFont.MeasureString(restartStr).Y), 1.0f);
+                DrawString(spriteBatch, gameOverStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(gameOverStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(gameOverStr).Y / 2), 1.0f);
+            }
+            // Level completed
+            else if (gameState == GameStateEnum.LevelCompleted)
+            {
+                spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White);
+                DrawString(spriteBatch, levelCompletedStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(levelCompletedStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(levelCompletedStr).Y / 2), 1.0f);
+                DrawString(spriteBatch, points.ToString(), Vector2.Zero, 1.0f);
+            }
             spriteBatch.End();
         }
 
@@ -677,10 +925,10 @@ namespace TestGame
                 blinkCounter = 0;
                 blink ^= true;
             }
-            spriteBatch.Begin();
             Vector2 scale;
             scale.X = (float)width / startScreen.Width;
             scale.Y = (float)totalHeight / startScreen.Height;
+            spriteBatch.Begin();
             spriteBatch.Draw(startScreen, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
             if (!blink)
                 DrawString(spriteBatch, startStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(startStr).X / 2, graphics.PreferredBackBufferHeight / 2), 1.0f);
@@ -698,7 +946,7 @@ namespace TestGame
                     if (player.dir == Direction.Left)
                     {
                         if (player.state == PlayerSpriteEnum.Jumping)
-                            player.UpdateVelocity(Vector2.Divide(friction, 2));
+                            player.UpdateVelocity(Vector2.Divide(friction, 1.25f));
                         else
                             player.UpdateVelocity(friction);
                         if (player.velocity.X > 0)
@@ -707,7 +955,7 @@ namespace TestGame
                     else
                     {
                         if (player.state == PlayerSpriteEnum.Jumping)
-                            player.UpdateVelocity(Vector2.Divide(-friction, 2));
+                            player.UpdateVelocity(Vector2.Divide(-friction, 1.25f));
                         else
                             player.UpdateVelocity(-friction);
                         if (player.velocity.X < 0)
@@ -730,7 +978,7 @@ namespace TestGame
             else if (gameState == GameStateEnum.LevelSelection)
             {
                 Vector2 v1, v2, v3;
-                v1 = new Vector2(levelMenu.positions[player.GetLevel()].X - player.pos.X, levelMenu.positions[player.GetLevel()].Y - player.pos.Y);
+                v1 = new Vector2(levelMenu.positions[player.GetLevel()].X - player.GetPosition().X, levelMenu.positions[player.GetLevel()].Y - player.GetPosition().Y);
                 v2 = v1;
                 v1.Normalize();
                 v1 *= player.speed / 2;
@@ -749,17 +997,25 @@ namespace TestGame
         void UpdatePlayerAnimation()
         {
             player.UpdateDirection();
-            if (player.pos != player.prevPos)
+            if (player.health <= 0)
             {
-                if (player.pos.Y != player.prevPos.Y && gameState == GameStateEnum.Playing)
-                    player.state = PlayerSpriteEnum.Jumping;
-                else if (player.pos.X != player.prevPos.X && !player.isJumping)
-                    player.state = PlayerSpriteEnum.Walking;
+                player.state = PlayerSpriteEnum.Dying;
             }
-            else if(!player.isJumping)
+            else
             {
-                player.state = PlayerSpriteEnum.Standing;
+                if (player.pos != player.prevPos)
+                {
+                    if (player.GetPosition().Y != player.prevPos.Y && gameState == GameStateEnum.Playing)
+                        player.state = PlayerSpriteEnum.Jumping;
+                    else if (player.GetPosition().X != player.prevPos.X && !player.isJumping)
+                        player.state = PlayerSpriteEnum.Walking;
+                }
+                else if (!player.isJumping && player.state != PlayerSpriteEnum.Handing)
+                {
+                    player.state = PlayerSpriteEnum.Standing;
+                }
             }
+
             if (player.state != player.prevState)
             {
                 player.frame = 0;
@@ -769,13 +1025,73 @@ namespace TestGame
             if (elapsedTime >= gameSpeed)
             {
                 player.frame = (player.frame + 1) % player.sprites[player.state].frames;
+                if (player.state == PlayerSpriteEnum.Jumping)
+                {
+                    if ((player.GetPosition().Y - player.prevPos.Y) < 0 && player.frame > 4)
+                        player.frame = 4;
+                    if ((player.GetPosition().Y - player.prevPos.Y) > 0 && player.frame > 9 && player.isFalling)
+                        player.frame = 9;
+                }
                 //player.sprites[player.state].rect.X = player.sprites[player.state].rect.Width * player.frame;
+            }
+        }
+
+        void UpdateChefAnimation()
+        {
+            if (chef.isAttacking)
+                chef.state = ChefSpriteEnum.Activating;
+            else
+                chef.state = ChefSpriteEnum.Standing;
+
+            if (chef.state != chef.prevState)
+            {
+                chef.frame = 0;
+                chef.prevState = chef.state;
+            }
+
+            if (elapsedTime >= gameSpeed)
+            {
+                chef.frame = (chef.frame + 1) % chef.sprites[chef.state].frames;
+                if (chef.state == ChefSpriteEnum.Activating && chef.frame >= chef.sprites[chef.state].frames - 1)
+                {
+                    chef.state = ChefSpriteEnum.Standing;
+                    int rand = random.Next(objectInfo.interactives.Count - 1);
+                    MapObject interactive = new MapObject(mapSprites.ElementAt(rand).Value, Vector2.Zero, objectInfo.interactives.ElementAt(rand).Value.speed, objectInfo.interactives.ElementAt(rand).Value.damage);
+                    interactive.SetPosition(new Vector2(player.GetPosition().X - interactive.sprite.rect.Width / 2, -interactive.sprite.rect.Height));
+                    mapInteractives.Add(interactive);
+                    if (random.NextDouble() > 0.7f)
+                        chef.isAttacking = true;
+                    else
+                        chef.isAppearing = false;
+                }
+            }
+        }
+
+        void UpdateChefPosition()
+        {
+            if (chef.isAppearing)
+                chef.pos.Y += chef.speed;
+            else
+                chef.pos.Y -= chef.speed;
+
+            if (chef.pos.Y >= -200)
+            {
+                chef.pos.Y = -200;
+                chef.isAttacking = true;
+            }
+            else
+                chef.isAttacking = false;
+
+            if (chef.pos.Y <= -chef.sprites[chef.state].rect.Height)
+            {
+                chef.pos.Y = -chef.sprites[chef.state].rect.Height;
+                chef.canAppear = true;
             }
         }
 
         void CheckPlayerCollisions()
         {
-            Rectangle playerRect = new Rectangle((int)(player.pos.X - player.sprites[player.state].origin.X), (int)(player.pos.Y - player.sprites[player.state].origin.Y), player.sprites[player.state].rect.Width, player.sprites[player.state].rect.Height);
+            Rectangle playerRect = new Rectangle((int)(player.GetPosition().X - player.sprites[player.state].origin.X), (int)(player.GetPosition().Y - player.sprites[player.state].origin.Y), player.sprites[player.state].rect.Width, player.sprites[player.state].rect.Height);
             
             // Collision with items
             foreach (GameObject e in mapItems)
@@ -783,11 +1099,13 @@ namespace TestGame
                 Rectangle itemRect = new Rectangle((int)(e.pos.X), (int)(e.pos.Y), e.sprite.rect.Width, e.sprite.rect.Height);
                 if (playerRect.Intersects(itemRect))
                 {
-                    if (IntersectPixels(playerRect, player.sprites[player.state].GetTextureData(player.dir)[player.frame], itemRect, e.sprite.GetTextureData(1)[e.frame]) && e.alive)
+                    if (IntersectPixels(playerRect, player.sprites[player.state].GetTextureData(player.dir)[player.frame], itemRect, e.sprite.GetTextureData(1)[e.frame]) && e.isAlive)
                     {
                         e.collision = true;
-                        e.alive = false;
-                        itemCounter[(CollectibleEnum)e.sprite.id]--;
+                        e.isAlive = false;
+                        itemCounter[(CollectibleEnum)e.sprite.id][1]--;
+                        if (itemCounter[(CollectibleEnum)e.sprite.id][1] < 0)
+                            itemCounter[(CollectibleEnum)e.sprite.id][1] = 0;
                     }
                     else
                     {
@@ -795,40 +1113,47 @@ namespace TestGame
                     }
                 }
             }
-            mapItems.RemoveAll(p => p.alive == false);
+            //mapItems.RemoveAll(p => p.isAlive == false);
 
             // Collision with enemies
             foreach (EnemyObject e in mapEnemies)
             {
                 Rectangle enemyRect = new Rectangle((int)(e.pos.X), (int)(e.pos.Y), e.sprite.rect.Width, e.sprite.rect.Height);
-                if (IntersectPixels(playerRect, player.sprites[player.state].GetTextureData(player.dir)[player.frame], enemyRect, e.sprite.GetTextureData(e.dir)[e.frame]) && e.alive)
+                if (IntersectPixels(playerRect, player.sprites[player.state].GetTextureData(player.dir)[player.frame], enemyRect, e.sprite.GetTextureData(e.dir)[e.frame]) && e.isAlive)
                 {
                     e.collision = true;
-                    if (player.pos.Y > e.pos.Y)
-                        player.SetHealth(-1.0f);
-                    else e.alive = false;
+                    if (collisionPoint.X > player.GetPosition().X - player.sprites[player.state].rect.Width / 4 &&
+                        collisionPoint.X < player.GetPosition().X + player.sprites[player.state].rect.Width / 4 &&
+                        collisionPoint.Y > player.GetPosition().Y - enemyRect.Height &&
+                        collisionPoint.Y < player.GetPosition().Y &&
+                        collisionPoint.Y > e.pos.Y &&
+                        collisionPoint.Y < e.pos.Y + e.sprite.rect.Height &&
+                        player.isFalling)
+                        e.isAlive = false;
+                    if (!player.isInvincible && e.isAlive && player.state != PlayerSpriteEnum.Handing)
+                    {
+                        player.SetHealth(-e.damage);
+                        player.isInvincible = true;
+                    }
                 }
-                else
-                {
-                    e.collision = false;
-                }
-                //str = player.pos.ToString() + " " + e.pos.ToString();
+                e.collision = false;
             }
+            //mapEnemies.RemoveAll(p => p.isAlive == false);
 
             // Collision with map platforms
             player.isFalling = true;
-            if (player.pos.Y - player.prevPos.Y >= 0)
+            if (player.GetPosition().Y - player.prevPos.Y >= 0)
             {
                 foreach (MapObject m in mapPlatforms)
                 {
-                    Rectangle objectRect = new Rectangle((int)m.pos.X, (int)m.pos.Y, m.sprite.rect.Width, 1/*m.sprite.rect.Height*/);
+                    Rectangle objectRect = new Rectangle((int)m.pos.X, (int)m.pos.Y, m.sprite.rect.Width, 1);
                     if (player.Collided(objectRect))
                         player.isFalling = false;
                     if (!player.isFalling)
                     {
                         player.isJumping = false;
                         player.canJump = true;
-                        player.pos.Y = objectRect.Bottom;
+                        player.SetPosition(new Vector2(player.GetPosition().X, objectRect.Bottom));
                         player.ResetJump();
                         break;
                     }
@@ -841,12 +1166,38 @@ namespace TestGame
                 Rectangle interactiveRect = new Rectangle((int)(e.pos.X), (int)(e.pos.Y), e.sprite.rect.Width, e.sprite.rect.Height);
                 if (IntersectPixels(playerRect, player.sprites[player.state].GetTextureData(player.dir)[player.frame], interactiveRect, e.sprite.GetTextureData(1)[e.frame]))
                 {
-                    str = e.sprite.id.ToString();
+                    if ((MapEnum)e.sprite.id == MapEnum.Oven)
+                    {
+                        if (map.isCompleted && !player.isFalling)
+                        {
+                            player.dir = e.dir;
+                            player.state = PlayerSpriteEnum.Handing;
+                            player.SetPosition(new Vector2(e.pos.X - 120, player.GetPosition().Y));
+                            player.SetVelocity(Vector2.Zero);
+                        }
+                    }
+                    else if (e.isAlive)
+                    {
+                        player.SetHealth(-e.damage);
+                        e.isAlive = false;
+                    }
                 }
-                else
-                {
-                    str = "NOPE, CHUCK TESTA";
-                }
+            }
+
+            // Collision with map bounds
+            if (player.GetPosition().X - player.sprites[player.state].rect.Width / 2 <= 0)
+            {
+                player.SetVelocity(Vector2.Zero);
+                player.SetPosition(new Vector2(player.sprites[player.state].rect.Width / 2, player.GetPosition().Y));
+                if (player.state == PlayerSpriteEnum.Walking)
+                    player.state = PlayerSpriteEnum.Standing;
+            }
+            else if (player.GetPosition().X + player.sprites[player.state].rect.Width / 2 >= map.rect.Width)
+            {
+                player.SetVelocity(Vector2.Zero);
+                player.SetPosition(new Vector2(map.rect.Width - player.sprites[player.state].rect.Width / 2, player.GetPosition().Y));
+                if (player.state == PlayerSpriteEnum.Walking)
+                    player.state = PlayerSpriteEnum.Standing;
             }
         }
 
@@ -862,13 +1213,16 @@ namespace TestGame
                     {
                         Rectangle objectRect = new Rectangle((int)m.pos.X, (int)m.pos.Y, m.sprite.rect.Width, 1);
                         if (e.Collided(objectRect))
+                        {
                             e.isFalling = false;
+                            e.pos.Y = - e.sprite.rect.Height + m.pos.Y + 1;
+                        }
                     }
                 }
             }
         }
 
-        public static bool IntersectPixels(Rectangle rectangleA, Color[] dataA, Rectangle rectangleB, Color[] dataB)
+        public bool IntersectPixels(Rectangle rectangleA, Color[] dataA, Rectangle rectangleB, Color[] dataB)
         {
             // Find the bounds of the rectangle intersection
             int top = Math.Max(rectangleA.Top, rectangleB.Top);
@@ -891,6 +1245,7 @@ namespace TestGame
                     if (colorA.A != 0 && colorB.A != 0)
                     {
                         // then an intersection has been found
+                        collisionPoint = new Point(x, y);
                         return true;
                     }
                 }

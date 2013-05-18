@@ -41,15 +41,26 @@ namespace SharedContent
         {
             public MapEnum type;
             public Vector2 pos;
+            public Direction dir;
         };
 
+        [ContentSerializerIgnore]
+        public bool isCompleted;
         public String background;
+        public TimeSpan time;
+        public Vector2 startPos;
+        public Rectangle rect;
         public List<Interactive> interactives;
         public List<Scenery> scenery;
         public List<Platform> platforms;
         public List<Item> items;
         public List<Enemy> enemies;
-        public Dictionary<CollectibleEnum, int> collectibles;
+        public Dictionary<CollectibleEnum, int[]> collectibles;
+
+        public Map()
+        {
+            isCompleted = false;
+        }
 
         public List<String> GetPlatformTypes()
         {

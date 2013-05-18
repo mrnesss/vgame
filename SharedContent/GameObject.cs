@@ -25,7 +25,7 @@ namespace SharedContent
         [ContentSerializerIgnore]
         public bool prevCollision;
         [ContentSerializerIgnore]
-        public bool alive;
+        public bool isAlive;
         [ContentSerializerIgnore]
         public float distance;
         [ContentSerializerIgnore]
@@ -43,12 +43,16 @@ namespace SharedContent
             this.sprite = sprite;
             this.pos = pos;
             this.updateTime = updateTime;
+        }
+
+        public virtual void Initialize()
+        {
             frame = 0;
             ellapsedTime = 0;
             alpha = 1.0f;
             collision = false;
             prevCollision = false;
-            alive = true;
+            isAlive = true;
             distance = 5.0f;
             moved = 0.0f;
             up = false;

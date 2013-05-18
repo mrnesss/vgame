@@ -11,6 +11,9 @@ namespace SharedContent
         Stairs,
         Shelf,
         Drawer,
-        Oven
+        Oven,
+        Knife,
+        Spatula,
+        Whisk
     }
 }

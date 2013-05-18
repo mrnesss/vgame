@@ -9,14 +9,18 @@
       </Item>
       <Item>
         <Key>1</Key>
-        <Value>Options</Value>
+        <Value>Instructions</Value>
       </Item>
       <Item>
         <Key>2</Key>
-        <Value>Credits</Value>
+        <Value>Map</Value>
       </Item>
       <Item>
         <Key>3</Key>
+        <Value>Minigames</Value>
+      </Item>
+      <Item>
+        <Key>4</Key>
         <Value>About</Value>
       </Item>
     </options>

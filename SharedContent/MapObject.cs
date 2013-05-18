@@ -22,7 +22,15 @@ namespace SharedContent
         public int frame;
         [ContentSerializerIgnore]
         public int ellapsedTime;
+        [ContentSerializerIgnore]
+        public bool isAlive;
         public int updateTime;
+        [ContentSerializer(Optional = true)]
+        public Direction dir;
+        [ContentSerializer(Optional = true)]
+        public float speed;
+        [ContentSerializer(Optional = true)]
+        public float damage;
 
         public MapObject()
         {
@@ -33,9 +41,16 @@ namespace SharedContent
         {
             this.sprite = sprite;
             this.pos = pos;
+            isAlive = true;
             alpha = 1.0f;
             frame = 0;
             ellapsedTime = 0;
+        }
+
+        public MapObject(Sprite sprite, Vector2 pos, float speed, float damage) : this(sprite, pos)
+        {
+            this.speed = speed;
+            this.damage = damage;
         }
 
         public MapObject(Texture2D texture, Vector2 pos)
@@ -53,6 +68,18 @@ namespace SharedContent
                 frame = (frame + 1) % sprite.frames;
                 ellapsedTime = 0;
             }
+        }
+
+        public void SetPosition(Vector2 pos)
+        {
+            this.pos = pos;
+        }
+
+        public void UpdatePosition(int mapHeight)
+        {
+            pos.Y += speed;
+            if (pos.Y > mapHeight)
+                isAlive = false;
         }
     }
 }

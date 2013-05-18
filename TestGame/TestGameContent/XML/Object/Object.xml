@@ -49,13 +49,50 @@
       <Item>
         <Key>Mouse</Key>
         <Value>
-          <frames>4</frames>
-          <updateTime>125</updateTime>
-          <speed>4.0</speed>
+          <frames>10</frames>
+          <updateTime>75</updateTime>
+          <speed>12.0</speed>
+          <damage>10.0</damage>
+        </Value>
+      </Item>
+      <Item>
+        <Key>Roach</Key>
+        <Value>
+          <frames>9</frames>
+          <updateTime>100</updateTime>
+          <speed>8.0</speed>
+          <damage>5.0</damage>
         </Value>
       </Item>
     </enemies>
     <interactives>
+      <Item>
+        <Key>Knife</Key>
+        <Value>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
+          <speed>24.0</speed>
+          <damage>30.0</damage>
+        </Value>
+      </Item>
+      <Item>
+        <Key>Spatula</Key>
+        <Value>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
+          <speed>20.0</speed>
+          <damage>10.0</damage>
+        </Value>
+      </Item>
+      <Item>
+        <Key>Whisk</Key>
+        <Value>
+          <frames>1</frames>
+          <updateTime>0</updateTime>
+          <speed>20.0</speed>
+          <damage>12.0</damage>
+        </Value>
+      </Item>
       <Item>
         <Key>Oven</Key>
         <Value>

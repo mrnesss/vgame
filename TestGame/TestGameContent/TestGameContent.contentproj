@@ -49,20 +49,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Player\M_Mechanic_Robot.png">
-      <Name>M_Mechanic_Robot</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Texture\Player\Sprites.png">
-      <Name>Sprites</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Texture\Collectible\Item\StarCoin.png">
       <Name>StarCoin</Name>
       <Importer>TextureImporter</Importer>
@@ -119,13 +105,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Enemy\Mouse.png">
-      <Name>Mouse</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="XML\Object\Object.xml">
       <Name>Object</Name>
       <Importer>XmlImporter</Importer>
@@ -133,9 +112,7 @@
       <SubType>Designer</SubType>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="XML\Sprite\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="Texture\Menu\Background\LevelSelect.png">
       <Name>LevelSelect</Name>
@@ -167,29 +144,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Player\Lili_Walking.png">
-      <Name>Lili_Walking</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Texture\UI\Cover.png">
       <Name>Cover</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Texture\Player\lilycamin.png">
-      <Name>lilycamin</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Texture\Player\lilicamin2.png">
-      <Name>lilicamin2</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -371,31 +327,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Player\Jumping\Lily_saltando0001.png">
-      <Name>Lily_saltando0001</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Texture\Player\Jumping\Lily_saltando0002.png">
-      <Name>Lily_saltando0002</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Texture\Player\Jumping\Lily_saltando0003.png">
-      <Name>Lily_saltando0003</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Texture\Player\Jumping\Lily_saltando0004.png">
-      <Name>Lily_saltando0004</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Texture\Player\Jumping\Lily_saltando0005.png">
-      <Name>Lily_saltando0005</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
     <Compile Include="Texture\Player\Jumping\Lily_saltando0006.png">
       <Name>Lily_saltando0006</Name>
       <Importer>TextureImporter</Importer>
@@ -839,6 +770,391 @@
   <ItemGroup>
     <Compile Include="Texture\Map\Interactive\Oven.png">
       <Name>Oven</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Enemy\Mouse\Rata0001.png">
+      <Name>Rata0001</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0002.png">
+      <Name>Rata0002</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0003.png">
+      <Name>Rata0003</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0004.png">
+      <Name>Rata0004</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0005.png">
+      <Name>Rata0005</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0006.png">
+      <Name>Rata0006</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0007.png">
+      <Name>Rata0007</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0008.png">
+      <Name>Rata0008</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0009.png">
+      <Name>Rata0009</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Mouse\Rata0010.png">
+      <Name>Rata0010</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0001.png">
+      <Name>Cucaracha0001</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0002.png">
+      <Name>Cucaracha0002</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0003.png">
+      <Name>Cucaracha0003</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0004.png">
+      <Name>Cucaracha0004</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0005.png">
+      <Name>Cucaracha0005</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0006.png">
+      <Name>Cucaracha0006</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0007.png">
+      <Name>Cucaracha0007</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0008.png">
+      <Name>Cucaracha0008</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Enemy\Roach\Cucaracha0009.png">
+      <Name>Cucaracha0009</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0001.png">
+      <Name>Chef_parado0001</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0002.png">
+      <Name>Chef_parado0002</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0003.png">
+      <Name>Chef_parado0003</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0004.png">
+      <Name>Chef_parado0004</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0005.png">
+      <Name>Chef_parado0005</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0006.png">
+      <Name>Chef_parado0006</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0007.png">
+      <Name>Chef_parado0007</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0008.png">
+      <Name>Chef_parado0008</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0009.png">
+      <Name>Chef_parado0009</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0010.png">
+      <Name>Chef_parado0010</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0011.png">
+      <Name>Chef_parado0011</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0012.png">
+      <Name>Chef_parado0012</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0013.png">
+      <Name>Chef_parado0013</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0014.png">
+      <Name>Chef_parado0014</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0015.png">
+      <Name>Chef_parado0015</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0016.png">
+      <Name>Chef_parado0016</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0017.png">
+      <Name>Chef_parado0017</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0018.png">
+      <Name>Chef_parado0018</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0019.png">
+      <Name>Chef_parado0019</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0020.png">
+      <Name>Chef_parado0020</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0021.png">
+      <Name>Chef_parado0021</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0022.png">
+      <Name>Chef_parado0022</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0023.png">
+      <Name>Chef_parado0023</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0024.png">
+      <Name>Chef_parado0024</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0025.png">
+      <Name>Chef_parado0025</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0026.png">
+      <Name>Chef_parado0026</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0027.png">
+      <Name>Chef_parado0027</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0028.png">
+      <Name>Chef_parado0028</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0029.png">
+      <Name>Chef_parado0029</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0030.png">
+      <Name>Chef_parado0030</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0031.png">
+      <Name>Chef_parado0031</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0032.png">
+      <Name>Chef_parado0032</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0033.png">
+      <Name>Chef_parado0033</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Standing\Chef_parado0034.png">
+      <Name>Chef_parado0034</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0001.png">
+      <Name>Chef_activando0001</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0002.png">
+      <Name>Chef_activando0002</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0003.png">
+      <Name>Chef_activando0003</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0004.png">
+      <Name>Chef_activando0004</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0005.png">
+      <Name>Chef_activando0005</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0006.png">
+      <Name>Chef_activando0006</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0007.png">
+      <Name>Chef_activando0007</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0008.png">
+      <Name>Chef_activando0008</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0009.png">
+      <Name>Chef_activando0009</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0010.png">
+      <Name>Chef_activando0010</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0011.png">
+      <Name>Chef_activando0011</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0012.png">
+      <Name>Chef_activando0012</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0013.png">
+      <Name>Chef_activando0013</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0014.png">
+      <Name>Chef_activando0014</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0015.png">
+      <Name>Chef_activando0015</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0016.png">
+      <Name>Chef_activando0016</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0017.png">
+      <Name>Chef_activando0017</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0018.png">
+      <Name>Chef_activando0018</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Chef\Activating\Chef_activando0019.png">
+      <Name>Chef_activando0019</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Texture\Map\Interactive\Whisk.png">
+      <Name>Whisk</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Map\Interactive\Spatula.png">
+      <Name>Spatula</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Texture\Map\Interactive\Knife.png">
+      <Name>Knife</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

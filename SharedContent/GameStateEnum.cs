@@ -11,6 +11,8 @@ namespace SharedContent
         MainMenu,
         LevelSelection,
         Playing,
-        Paused
+        Paused,
+        GameOver,
+        LevelCompleted
     }
 }

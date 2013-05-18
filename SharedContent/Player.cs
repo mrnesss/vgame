@@ -11,9 +11,10 @@ namespace SharedContent
     {
         public PlayerSpriteEnum state;
         public PlayerSpriteEnum prevState;
-        public Dictionary<Enum, PlayerSprite> sprites;
+        public Dictionary<Enum, CharacterSprite> sprites;
         public Vector2 pos;
         public Vector2 prevPos;
+        public Vector2 startPos;
         public Direction dir;
         public int frame;
         public int level;
@@ -25,7 +26,13 @@ namespace SharedContent
         public bool isJumping;
         public bool isFalling;
         public bool canJump;
+        public bool isInvincible;
+        public bool blink;
+        public bool isAlive;
         public float health;
+        public int iFrames;
+        public int iCounter;
+        public int blinkCounter;
 
         public String test;
 
@@ -37,24 +44,33 @@ namespace SharedContent
             this.jump = jump;
             this.speed = speed;
             this.acceleration = acceleration;
-            sprites = new Dictionary<Enum, PlayerSprite>();
+            sprites = new Dictionary<Enum, CharacterSprite>();
             prevPos = pos;
             jumpVel = new Vector2(0, jump);
+            health = 100.0f;
         }
 
         public void Initialize()
         {
+            pos = startPos;
+            prevPos = pos;
             prevState = state;
             velocity = Vector2.Zero;
             isJumping = false;
-            isFalling = true;
+            isFalling = false;
             canJump = false;
             frame = 0;
             level = 0;
             health = 100.0f;
+            isAlive = true;
+            isInvincible = false;
+            iFrames = 1500;
+            iCounter = 0;
+            blink = false;
+            blinkCounter = 0;
         }
 
-        public void AddSprite(PlayerSpriteEnum id, PlayerSprite sprite)
+        public void AddSprite(PlayerSpriteEnum id, CharacterSprite sprite)
         {
             sprites.Add(id, sprite);
         }
@@ -65,6 +81,26 @@ namespace SharedContent
                 dir = Direction.Left;
             else if (velocity.X > 0)
                 dir = Direction.Right;
+        }
+
+        public void UpdateInvincibility(int gameTime)
+        {
+            if (isInvincible)
+            {
+                iCounter += gameTime;
+                blinkCounter += gameTime;
+                if (blinkCounter >= 250)
+                {
+                    blink ^= true;
+                    blinkCounter = 0;
+                }
+            }
+            if (iCounter >= iFrames)
+            {
+                isInvincible = false;
+                blink = false;
+                iCounter = 0;
+            }
         }
 
         public void UpdateJump(Vector2 gravity)
@@ -104,7 +140,7 @@ namespace SharedContent
         {
             float distance = Math.Max(1, (float)Math.Abs(Math.Ceiling(pos.Y - prevPos.Y)));
             Rectangle r = new Rectangle((int)(pos.X - sprites[state].origin.X), (int)(pos.Y - distance), sprites[state].rect.Width, (int)distance);
-            if (pos.X > rect.Left && pos.X < rect.Right && rect.Intersects(r))
+            if (pos.X + 45 > rect.Left && pos.X - 45 < rect.Right && rect.Intersects(r))
                 return true;
             else
                 return false;
@@ -136,6 +172,20 @@ namespace SharedContent
                 health = 100.0f;
             else if (health < 0.0f)
                 health = 0.0f;
+        }
+
+        public void SetPosition(Vector2 pos)
+        {
+            this.pos = pos;
+        }
+
+        public Vector2 GetPosition()
+        {
+            return pos;
+        }
+
+        public void SetStartingPosition(Vector2 startPos) {
+            this.startPos = startPos;
         }
     }
 }

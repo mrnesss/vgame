@@ -7,6 +7,7 @@ namespace SharedContent
 {
     public enum EnemyEnum
     {
-        Mouse
+        Mouse,
+        Roach
     }
 }

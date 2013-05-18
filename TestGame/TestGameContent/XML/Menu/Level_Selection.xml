@@ -3,7 +3,7 @@
   <Asset Type="SharedContent.LevelMenu">
     <bg>LevelSelect</bg>
     <levels>3</levels>
-    <positions>120 300 400 500 680 200</positions>
+    <positions>400 700 1400 1200 2300 1000</positions>
   </Asset>
 </XnaContent>
 
