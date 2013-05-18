@@ -53,6 +53,8 @@
           <updateTime>75</updateTime>
           <speed>12.0</speed>
           <damage>10.0</damage>
+          <poisonTimer>3000</poisonTimer>
+          <dot>1.5</dot>
         </Value>
       </Item>
       <Item>

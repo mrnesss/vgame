@@ -283,7 +283,7 @@ namespace TestGame
                 }
 
                 // Makes the chef appear randomly
-                if (chef.canAppear && random.NextDouble() > 0.9965f)
+                if (chef.canAppear && random.NextDouble() > 0.995f)
                 {
                     chef.isAppearing = true;
                     chef.canAppear = false;
@@ -302,6 +302,9 @@ namespace TestGame
 
                 // Update player invincibility frames
                 player.UpdateInvincibility(gameTime.ElapsedGameTime.Milliseconds);
+
+                // Update player poison
+                player.UpdatePoison(gameTime.ElapsedGameTime.Milliseconds);
 
                 // Check if all the ingredients were picked up
                 if (itemCounter.All(p => p.Value.ElementAt(1) == 0))
@@ -327,6 +330,7 @@ namespace TestGame
                 if (player.state == PlayerSpriteEnum.Handing && player.frame == player.sprites[player.state].frames - 1)
                 {
                     points = (int)(((map.time - elapsedGameTime > TimeSpan.Zero)? map.time - elapsedGameTime : TimeSpan.Zero).TotalMilliseconds / 100 * player.GetHealth());
+                    player.ChangeLevel(1, levelMenu.levels);
                     gameState = GameStateEnum.LevelCompleted;
                 }
 
@@ -349,6 +353,22 @@ namespace TestGame
             string filename;
 
             MediaPlayer.Play(songs[1]);
+
+            // Clear previous lists and dictionaries
+            collectibleTextures.Clear();
+            enemyTextures.Clear();
+            mapTextures.Clear();
+            sceneryTextures.Clear();
+            //interactiveTextures.Clear();
+            itemSprites.Clear();
+            enemySprites.Clear();
+            mapSprites.Clear();
+            //itemCounter.Clear();
+            mapItems.Clear();
+            mapEnemies.Clear();
+            mapPlatforms.Clear();
+            mapScenery.Clear();
+            mapInteractives.Clear();
 
             // Load XML info
             map = Content.Load<Map>("XML/Map/Map_" + level);
@@ -486,7 +506,11 @@ namespace TestGame
             // Add enemies to list and initialize them
             foreach (Map.Enemy e in map.enemies)
             {
-                EnemyObject enemy = new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed, objectInfo.enemies[e.type].damage);
+                EnemyObject enemy;
+                if(objectInfo.enemies[e.type].poisonTimer != 0)
+                    enemy = new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed, objectInfo.enemies[e.type].damage, objectInfo.enemies[e.type].poisonTimer, objectInfo.enemies[e.type].dot);
+                else
+                    enemy = new EnemyObject(enemySprites[e.type], e.pos, objectInfo.enemies[e.type].updateTime, objectInfo.enemies[e.type].speed, objectInfo.enemies[e.type].damage);
                 mapEnemies.Add(enemy);
                 enemy.Initialize();
             }
@@ -629,7 +653,6 @@ namespace TestGame
                             break;
                         case Keys.Down:
                         case Keys.S:
-                            str = "Down";
                             break;
                     }
                 }
@@ -690,6 +713,19 @@ namespace TestGame
                     gameState = GameStateEnum.MainMenu;
                 }
             }
+            // Level completed
+            if (gameState == GameStateEnum.LevelCompleted)
+            {
+                if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter))
+                {
+                    LoadLevel(player.GetLevel() + 1);
+                    InitializeLevel();
+                    player.Initialize();
+                    chef.Initialize();
+                    gameState = GameStateEnum.Playing;
+                    elapsedGameTime = TimeSpan.Zero;
+                }
+            }
             pkbs = kbs;
         }
 
@@ -718,7 +754,7 @@ namespace TestGame
                 blinkCounter += gameTime.ElapsedGameTime.Milliseconds;
                 DrawStartScreen();
             }
-            if (gameState == GameStateEnum.GameOver)
+            if (gameState == GameStateEnum.GameOver || gameState == GameStateEnum.LevelCompleted)
             {
                 blinkCounter += gameTime.ElapsedGameTime.Milliseconds;
             }
@@ -822,9 +858,9 @@ namespace TestGame
                 }
             }*/
             if (player.blink)
-                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, Color.White * 0.5f, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, (player.isPoisoned) ? new Color(1.0f, 0.7f, 1.0f, 1.0f) : Color.White * 0.5f, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             else
-                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, (player.isPoisoned) ? new Color(1.0f, 0.7f, 1.0f, 1.0f) : Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X, mapEnemies.ElementAt(0).pos.Y), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
             //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X, mapEnemies.ElementAt(0).pos.Y + mapEnemies.ElementAt(0).sprite.rect.Height), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
             //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X + mapEnemies.ElementAt(0).sprite.rect.Width, mapEnemies.ElementAt(0).pos.Y), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
@@ -846,7 +882,7 @@ namespace TestGame
             x = (int)(- itemsWidth + width / 2);
             string pauseStr = "Pause";
             string gameOverStr = "Game over";
-            string levelCompletedStr = "Level completed!";
+            string nextLevelStr = "Press ENTER to continue";
             string healthStr = "Health: " + player.GetHealth() + "%";
             spriteBatch.Begin();
             DrawString(spriteBatch, "Time: " + time, new Vector2(width / 2 - spriteFont.MeasureString("Time: 0.00").X / 2, 0.0f), 0.75f);
@@ -889,10 +925,19 @@ namespace TestGame
             // Level completed
             else if (gameState == GameStateEnum.LevelCompleted)
             {
+                string levelCompletedStr = "Level completed!";
+                if (blinkCounter > 750)
+                {
+                    blinkCounter = 0;
+                    blink ^= true;
+                }
                 spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White);
                 DrawString(spriteBatch, levelCompletedStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(levelCompletedStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(levelCompletedStr).Y / 2), 1.0f);
                 DrawString(spriteBatch, points.ToString(), Vector2.Zero, 1.0f);
+                if (!blink)
+                    DrawString(spriteBatch, nextLevelStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(nextLevelStr).X / 2, graphics.PreferredBackBufferHeight * 0.75f), 1.0f);
             }
+            DrawString(spriteBatch, player.poisonTimer.ToString(), Vector2.Zero, 1.0f);
             spriteBatch.End();
         }
 
@@ -1135,6 +1180,11 @@ namespace TestGame
                         player.SetHealth(-e.damage);
                         player.isInvincible = true;
                     }
+                    if (e.poisonTimer != 0)
+                    {
+                        player.SetPoisonTimer(e.poisonTimer);
+                    }
+
                 }
                 e.collision = false;
             }

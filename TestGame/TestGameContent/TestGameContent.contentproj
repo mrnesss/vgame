@@ -112,7 +112,14 @@
       <SubType>Designer</SubType>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="XML\Map\Map_2.xml">
+      <SubType>Designer</SubType>
+      <Name>Map_2</Name>
+      <Importer>XmlImporter</Importer>
+      <Processor>PassThroughProcessor</Processor>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Texture\Menu\Background\LevelSelect.png">
       <Name>LevelSelect</Name>
@@ -129,8 +136,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Map\Background\Background.jpg">
-      <Name>Background</Name>
+    <Compile Include="Texture\Map\Background\Wall.jpg">
+      <Name>Wall</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -440,8 +447,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Texture\Map\Background\Wall.png">
-      <Name>Wall</Name>
+    <Compile Include="Texture\Map\Background\Background.png">
+      <Name>Background</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

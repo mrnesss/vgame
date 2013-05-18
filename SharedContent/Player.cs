@@ -29,10 +29,12 @@ namespace SharedContent
         public bool isInvincible;
         public bool blink;
         public bool isAlive;
+        public bool isPoisoned;
         public float health;
         public int iFrames;
         public int iCounter;
-        public int blinkCounter;
+        public int blinkTimer;
+        public int poisonTimer;
 
         public String test;
 
@@ -46,6 +48,7 @@ namespace SharedContent
             this.acceleration = acceleration;
             sprites = new Dictionary<Enum, CharacterSprite>();
             prevPos = pos;
+            level = 0;
             jumpVel = new Vector2(0, jump);
             health = 100.0f;
         }
@@ -60,14 +63,14 @@ namespace SharedContent
             isFalling = false;
             canJump = false;
             frame = 0;
-            level = 0;
             health = 100.0f;
             isAlive = true;
             isInvincible = false;
+            isPoisoned = false;
             iFrames = 1500;
             iCounter = 0;
             blink = false;
-            blinkCounter = 0;
+            blinkTimer = 0;
         }
 
         public void AddSprite(PlayerSpriteEnum id, CharacterSprite sprite)
@@ -88,11 +91,11 @@ namespace SharedContent
             if (isInvincible)
             {
                 iCounter += gameTime;
-                blinkCounter += gameTime;
-                if (blinkCounter >= 250)
+                blinkTimer += gameTime;
+                if (blinkTimer >= 250)
                 {
                     blink ^= true;
-                    blinkCounter = 0;
+                    blinkTimer = 0;
                 }
             }
             if (iCounter >= iFrames)
@@ -108,6 +111,23 @@ namespace SharedContent
             jumpVel = Vector2.Subtract(jumpVel, Vector2.Divide(gravity, 10.0f));
             if (jumpVel.Y < -gravity.Length())
                 jumpVel = -gravity;
+        }
+
+        public void SetPoisonTimer(int poisonTimer)
+        {
+            this.poisonTimer = poisonTimer;
+        }
+
+        public void UpdatePoison(int elapsedTime)
+        {
+            poisonTimer -= elapsedTime;
+            if (poisonTimer <= 0)
+            {
+                isPoisoned = false;
+                poisonTimer = 0;
+            }
+            else
+                isPoisoned = true;
         }
 
         public void ResetJump()

@@ -21,17 +21,32 @@ namespace SharedContent
         [ContentSerializerIgnore]
         public bool right;
         public float damage;
+        [ContentSerializer(Optional = true)]
+        public int poisonTimer;
+        [ContentSerializer(Optional = true)]
+        public float dot;
 
         public EnemyObject()
         {
 
         }
 
-        public EnemyObject(Sprite sprite, Vector2 pos, int updateTime, float speed, float damage) : base(sprite, pos, updateTime)
+        public EnemyObject(Sprite sprite, Vector2 pos, int updateTime, float speed, float damage)
+            : base(sprite, pos, updateTime)
         {
             this.speed = speed;
             this.damage = damage;
             this.startPos = pos;
+        }
+
+        public EnemyObject(Sprite sprite, Vector2 pos, int updateTime, float speed, float damage, int poisonTimer, float dot)
+            : base(sprite, pos, updateTime)
+        {
+            this.speed = speed;
+            this.damage = damage;
+            this.startPos = pos;
+            this.poisonTimer = poisonTimer;
+            this.dot = dot;
         }
 
         public void UpdatePosition(Vector2 gravity, Vector2 playerPos, Rectangle playerRect)
