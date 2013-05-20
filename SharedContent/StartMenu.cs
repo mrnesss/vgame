@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 
 namespace SharedContent
 {
     public class StartMenu
     {
         public String bg;
-        public Dictionary<int, String> options;
+        public Dictionary<int, string> options;
         [ContentSerializerIgnore]
         public int selectedOption;
         [ContentSerializerIgnore]

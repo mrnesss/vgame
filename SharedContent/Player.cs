@@ -18,6 +18,7 @@ namespace SharedContent
         public Direction dir;
         public int frame;
         public int level;
+        public int prevLevel;
         public float jump;
         public Vector2 jumpVel;
         public float speed;
@@ -29,12 +30,10 @@ namespace SharedContent
         public bool isInvincible;
         public bool blink;
         public bool isAlive;
-        public bool isPoisoned;
         public float health;
         public int iFrames;
         public int iCounter;
         public int blinkTimer;
-        public int poisonTimer;
 
         public String test;
 
@@ -49,6 +48,7 @@ namespace SharedContent
             sprites = new Dictionary<Enum, CharacterSprite>();
             prevPos = pos;
             level = 0;
+            prevLevel = 0;
             jumpVel = new Vector2(0, jump);
             health = 100.0f;
         }
@@ -66,7 +66,27 @@ namespace SharedContent
             health = 100.0f;
             isAlive = true;
             isInvincible = false;
-            isPoisoned = false;
+            // DEVELOPMENT
+            //iFrames = 1500;
+            iFrames = Int32.MaxValue;
+            iCounter = 0;
+            blink = false;
+            blinkTimer = 0;
+        }
+
+        public void Initialize(Vector2 pos)
+        {
+            this.pos = pos;
+            prevPos = this.pos;
+            prevState = state;
+            velocity = Vector2.Zero;
+            isJumping = false;
+            isFalling = false;
+            canJump = false;
+            frame = 0;
+            health = 100.0f;
+            isAlive = true;
+            isInvincible = false;
             iFrames = 1500;
             iCounter = 0;
             blink = false;
@@ -111,23 +131,6 @@ namespace SharedContent
             jumpVel = Vector2.Subtract(jumpVel, Vector2.Divide(gravity, 10.0f));
             if (jumpVel.Y < -gravity.Length())
                 jumpVel = -gravity;
-        }
-
-        public void SetPoisonTimer(int poisonTimer)
-        {
-            this.poisonTimer = poisonTimer;
-        }
-
-        public void UpdatePoison(int elapsedTime)
-        {
-            poisonTimer -= elapsedTime;
-            if (poisonTimer <= 0)
-            {
-                isPoisoned = false;
-                poisonTimer = 0;
-            }
-            else
-                isPoisoned = true;
         }
 
         public void ResetJump()
@@ -175,6 +178,15 @@ namespace SharedContent
                 level = maxLevel - 1;
         }
 
+        public void SetLevel(int level, int maxLevel)
+        {
+            this.level = level;
+            if (this.level < 0)
+                this.level = 0;
+            else if (this.level >= maxLevel)
+                this.level = maxLevel - 1;
+        }
+
         public int GetLevel()
         {
             return level;
@@ -185,7 +197,7 @@ namespace SharedContent
             return health;
         }
 
-        public void SetHealth(float h)
+        public void UpdateHealth(float h)
         {
             health += h;
             if (health >= 100.0f)
@@ -196,7 +208,8 @@ namespace SharedContent
 
         public void SetPosition(Vector2 pos)
         {
-            this.pos = pos;
+            this.pos.X = (int)pos.X;
+            this.pos.Y = (int)pos.Y;
         }
 
         public Vector2 GetPosition()

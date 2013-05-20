@@ -13,6 +13,8 @@ namespace SharedContent
         Playing,
         Paused,
         GameOver,
-        LevelCompleted
+        LevelCompleted,
+        Options,
+        Intro
     }
 }

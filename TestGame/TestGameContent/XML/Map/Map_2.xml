@@ -21,10 +21,6 @@
         <type>Drawer</type>
         <pos>1800 400</pos>
       </Item>
-      <Item>
-        <type>Stairs</type>
-        <pos>100 300</pos>
-      </Item>
     </scenery>
     <platforms>
       <Item>

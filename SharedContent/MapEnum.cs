@@ -8,12 +8,16 @@ namespace SharedContent
     public enum MapEnum
     {
         Platform,
-        Stairs,
         Shelf,
         Drawer,
+        Spatula,
+        Extractor,
+        Fridge,
+        Pan,
+        Picture,
         Oven,
         Knife,
-        Spatula,
+        Pot,
         Whisk
     }
 }

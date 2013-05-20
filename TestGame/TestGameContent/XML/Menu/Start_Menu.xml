@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <XnaContent>
   <Asset Type="SharedContent.StartMenu">
-    <bg>Menu_Screen</bg>
+    <bg>Background</bg>
     <options>
       <Item>
         <Key>0</Key>

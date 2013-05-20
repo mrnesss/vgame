@@ -10,11 +10,22 @@ namespace SharedContent
 {
     public class LevelMenu
     {
+        public struct Level
+        {
+            public int level;
+            public Vector2 pos;
+            public bool isAvailable;
+            public Level(int level, Vector2 pos, bool available)
+            {
+                this.level = level;
+                this.pos = pos;
+                this.isAvailable = available;
+            }
+        };
         [ContentSerializerIgnore]
         public Texture2D background;
         public String bg;
-        public int levels;
-        public Vector2[] positions;
+        public List<Level> levels;
 
         public LevelMenu()
         {

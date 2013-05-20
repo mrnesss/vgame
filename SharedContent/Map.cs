@@ -17,6 +17,11 @@ namespace SharedContent
         {
             public MapEnum type;
             public Vector2 pos;
+            public Scenery(MapEnum type, Vector2 pos)
+            {
+                this.type = type;
+                this.pos = pos;
+            }
         };
 
         public struct Platform

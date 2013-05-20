@@ -18,6 +18,7 @@ namespace TestGame
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        #region Game variables
         GraphicsDeviceManager graphics;
         Song[] songs;
         TimeSpan elapsedGameTime;
@@ -28,7 +29,7 @@ namespace TestGame
         Viewport viewport;
         Map map;
         ObjectInfo objectInfo;
-        Texture2D background, startScreen, cover;
+        Texture2D background, startScreen, rainbow;
         LevelMenu levelMenu;
         StartMenu startMenu;
 
@@ -38,9 +39,13 @@ namespace TestGame
         GameStateEnum gameState;
 
         Point collisionPoint;
+        float levelSelectionScale;
         int gameSpeed = (int)Math.Round(1000 / 24.0f);
         int elapsedTime = 0;
         int points;
+        string accumStr;
+        int introTimer = 0;
+        int updateTime = 3500;
         string time;
         int blinkCounter;
         float volume = 0.0f;
@@ -57,23 +62,44 @@ namespace TestGame
         Dictionary<Enum, Sprite> enemySprites = new Dictionary<Enum, Sprite>();
         Dictionary<Enum, Sprite> mapSprites = new Dictionary<Enum, Sprite>();
         Dictionary<CollectibleEnum, int[]> itemCounter = new Dictionary<CollectibleEnum, int[]>();
+        Dictionary<String, Texture2D> menuTextures = new Dictionary<string, Texture2D>();
+        Dictionary<String, Texture2D> menuHiTextures = new Dictionary<string, Texture2D>();
+        Dictionary<String, Texture2D> screenTextures = new Dictionary<string, Texture2D>();
+        Dictionary<UIEnum, Texture2D> uiTextures = new Dictionary<UIEnum, Texture2D>();
         List<GameObject> mapItems = new List<GameObject>();
         List<EnemyObject> mapEnemies = new List<EnemyObject>();
         List<MapObject> mapPlatforms = new List<MapObject>();
         List<MapObject> mapScenery = new List<MapObject>();
         List<MapObject> mapInteractives = new List<MapObject>();
+        List<Texture2D> introTextures = new List<Texture2D>();
 
         Texture2D cursor;
 
-        int width, height, hudHeight, totalHeight;
+        int width, height, hudHeight, totalHeight, defaultWidth;
+        float defaultRatio;
+        #endregion
+
+        // DEVELOPMENT VARIABLES
+        List<Map.Scenery> editor = new List<Map.Scenery>();
+        Vector2 editorPos = Vector2.Zero;
+        struct Brush
+        {
+            public MapEnum type;
+            public Texture2D texture;
+        };
+        Brush brush;
 
         public Game1()
         {
-            width = 1000;
-            height = 540;
+            defaultWidth = 1600;
+            width = 1280;
+            totalHeight = (int)(width * 0.5625);
             hudHeight = 60;
-            totalHeight = height + hudHeight;
+            height = totalHeight - hudHeight;
+            defaultRatio = (float)width / defaultWidth;
             random = new Random((int)DateTime.Now.ToFileTime());
+
+            levelSelectionScale = 0.375f * defaultRatio;
 
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferHeight = totalHeight;
@@ -93,10 +119,10 @@ namespace TestGame
             songs = new Song[3];
             viewport = new Viewport(0, 0, 600, 600);
             kbs = new KeyboardState();
-            friction = new Vector2(0.3f, 0.0f);
+            friction = new Vector2(0.35f, 0.0f);
             gravity = new Vector2(0.0f, 20.0f);
 
-            player = new Player(PlayerSpriteEnum.Standing, Vector2.Zero, Direction.Left, 25.0f, 65.0f, new Vector2(0.3f, 0.0f));
+            player = new Player(PlayerSpriteEnum.Standing, Vector2.Zero, Direction.Left, 30.0f, 70.0f, new Vector2(0.4f, 0.0f));
             chef = new Chef(ChefSpriteEnum.Standing, new Vector2(0.0f, -1000.0f), Direction.Left, 8.0f);
 
             base.Initialize();
@@ -129,12 +155,59 @@ namespace TestGame
             // Load font
             spriteFont = Content.Load<SpriteFont>("Font/Stanberry");
 
+            // Load intro textures
+            path = "Texture/Intro/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                introTextures.Add(Content.Load<Texture2D>(path + filename));
+            }
+
             // Load start screen
             startScreen = Content.Load<Texture2D>("Texture/Menu/Background/Start_Screen");
-            //startScreen = Content.Load<Texture2D>("Texture/Menu/Background/SC_Cool");
+            rainbow = Content.Load<Texture2D>("Texture/Menu/Background/Rainbow");
 
-            // Load cover
-            cover = Content.Load<Texture2D>("Texture/UI/Cover");
+            // Load books
+            path = "Texture/Menu/Options/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                menuTextures.Add(filename, Content.Load<Texture2D>(path + filename));
+            }
+
+            // Load books highlight
+            path = "Texture/Menu/Highlight/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                menuHiTextures.Add(filename, Content.Load<Texture2D>(path + filename));
+            }
+
+            // Load screens
+            path = "Texture/Menu/Screens/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                screenTextures.Add(filename, Content.Load<Texture2D>(path + filename));
+            }
+
+            // Load UI textures
+            path = "Texture/UI/";
+            dir = new DirectoryInfo(Content.RootDirectory + "/" + path);
+            files = dir.GetFiles();
+            foreach (FileInfo e in files)
+            {
+                filename = e.Name.Split('.')[0];
+                uiTextures.Add((UIEnum)Enum.Parse(typeof(UIEnum), filename), Content.Load<Texture2D>(path + filename));
+            }
 
             // Load map textures
             path = "Texture/Map/Platform/";
@@ -213,11 +286,18 @@ namespace TestGame
             // Load level selection menu
             levelMenu = Content.Load<LevelMenu>("XML/Menu/Level_Selection");
             levelMenu.background = Content.Load<Texture2D>("Texture/Menu/Background/" + levelMenu.bg);
+            for (int i = 0; i < levelMenu.levels.Count; i++)
+            {
+                bool available = levelMenu.levels.ElementAt(i).isAvailable;
+                Vector2 pos = levelMenu.levels.ElementAt(i).pos;
+                levelMenu.levels.RemoveAt(i);
+                levelMenu.levels.Insert(i, new LevelMenu.Level(i, Vector2.Multiply(pos, defaultRatio), available));
+            }
 
             cursor = Content.Load<Texture2D>("Texture/cursor");
 
             // Set player starting position
-            player.SetPosition(levelMenu.positions[0]);
+            player.SetPosition(levelMenu.levels.ElementAt(0).pos);
         }
 
         /// <summary>
@@ -244,9 +324,6 @@ namespace TestGame
             CheckKeyboardState();
             kbs = Keyboard.GetState();
 
-            // Set elapsed time
-            time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", elapsedGameTime);
-
             // Set volume
             MediaPlayer.Volume = volume;
 
@@ -262,9 +339,27 @@ namespace TestGame
                 UpdatePlayerAnimation();
             }
 
+            // If intro is running
+            if (gameState == GameStateEnum.Intro)
+            {
+                introTimer += gameTime.ElapsedGameTime.Milliseconds;
+                if ((int)(introTimer / updateTime) > introTextures.Count - 1)
+                {
+                    gameState = GameStateEnum.MainMenu;
+                }
+
+            }
+
             // If game is currently unpaused
             if (gameState == GameStateEnum.Playing)
             {
+                // Set elapsed time
+                time = String.Format((elapsedGameTime.Minutes > 0) ? "{0:mm\\:ss\\.ff}" : "{0:ss\\.ff}", map.time - elapsedGameTime);
+
+                // Check if time ran out
+                if (map.time - elapsedGameTime < TimeSpan.Zero)
+                    player.UpdateHealth(-100.0f);
+
                 // Check collisions
                 CheckPlayerCollisions();
                 CheckEnemiesCollisions();
@@ -303,9 +398,6 @@ namespace TestGame
                 // Update player invincibility frames
                 player.UpdateInvincibility(gameTime.ElapsedGameTime.Milliseconds);
 
-                // Update player poison
-                player.UpdatePoison(gameTime.ElapsedGameTime.Milliseconds);
-
                 // Check if all the ingredients were picked up
                 if (itemCounter.All(p => p.Value.ElementAt(1) == 0))
                     map.isCompleted = true;
@@ -321,7 +413,7 @@ namespace TestGame
                 mapInteractives.RemoveAll(p => p.isAlive == false);
 
                 // Wait for animation to end to show game over screen
-                if (!player.isAlive && player.frame == player.sprites[player.state].frames - 1)
+                if (player.state == PlayerSpriteEnum.Dying && player.frame == player.sprites[player.state].frames - 1)
                 {
                     gameState = GameStateEnum.GameOver;
                 }
@@ -329,9 +421,16 @@ namespace TestGame
                 // Wait for animation to end to show level completed screen
                 if (player.state == PlayerSpriteEnum.Handing && player.frame == player.sprites[player.state].frames - 1)
                 {
-                    points = (int)(((map.time - elapsedGameTime > TimeSpan.Zero)? map.time - elapsedGameTime : TimeSpan.Zero).TotalMilliseconds / 100 * player.GetHealth());
-                    player.ChangeLevel(1, levelMenu.levels);
+                    points = (int)(Math.Truncate(((map.time - elapsedGameTime > TimeSpan.Zero) ? map.time - elapsedGameTime : TimeSpan.Zero).TotalMilliseconds / 10) * player.GetHealth());
+                    player.ChangeLevel(1, levelMenu.levels.Count);
                     gameState = GameStateEnum.LevelCompleted;
+                }
+
+                // Check is level is completed
+                if (gameState == GameStateEnum.LevelCompleted)
+                {
+                    accumStr = Math.Truncate(((map.time - elapsedGameTime).TotalMilliseconds / 10)) +
+                        " x " + player.GetHealth();
                 }
 
                 // Update game time
@@ -359,11 +458,9 @@ namespace TestGame
             enemyTextures.Clear();
             mapTextures.Clear();
             sceneryTextures.Clear();
-            //interactiveTextures.Clear();
             itemSprites.Clear();
             enemySprites.Clear();
             mapSprites.Clear();
-            //itemCounter.Clear();
             mapItems.Clear();
             mapEnemies.Clear();
             mapPlatforms.Clear();
@@ -456,6 +553,8 @@ namespace TestGame
 
         void InitializeLevel()
         {
+            brush.texture = mapTextures[MapEnum.Platform];
+
             // Initialize map info
             itemCounter = map.collectibles;
 
@@ -480,7 +579,7 @@ namespace TestGame
             {
                 MapEnum i = (MapEnum)Enum.Parse(typeof(MapEnum), e);
                 Rectangle rect = new Rectangle(0, 0, mapTextures[i].Width, mapTextures[i].Height);
-                mapSprites.Add(MapEnum.Platform, new Sprite(i, mapTextures[i], 1, mapTextures[i].Bounds, Vector2.Zero));
+                mapSprites.Add(i, new Sprite(i, mapTextures[i], 1, mapTextures[i].Bounds, Vector2.Zero));
             }
 
             // Add enemy sprites to dictionary
@@ -572,6 +671,12 @@ namespace TestGame
             // Reset chef state
             chef.Initialize();
 
+            // Reset interactives
+            mapInteractives.Clear();
+            // Add interactives to list
+            foreach (Map.Interactive e in map.interactives)
+                mapInteractives.Add(new MapObject(mapSprites[e.type], e.pos));
+
             // Reset game state
             gameState = GameStateEnum.Playing;
 
@@ -581,6 +686,70 @@ namespace TestGame
 
         void CheckKeyboardState()
         {
+            // DEVELOPMENT
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D2))
+            {
+                MapEnum en = MapEnum.Drawer;
+                brush.type = en;
+                brush.texture = sceneryTextures[en];
+            }
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D3))
+            {
+                MapEnum en = MapEnum.Extractor;
+                brush.type = en;
+                brush.texture = sceneryTextures[en];
+            }
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D4))
+            {
+                MapEnum en = MapEnum.Fridge;
+                brush.type = en;
+                brush.texture = sceneryTextures[en];
+            }
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D5))
+            {
+                MapEnum en = MapEnum.Pan;
+                brush.type = en;
+                brush.texture = sceneryTextures[en];
+            }
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D6))
+            {
+                MapEnum en = MapEnum.Picture;
+                brush.type = en;
+                brush.texture = sceneryTextures[en];
+            }
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D7))
+            {
+                MapEnum en = MapEnum.Spatula;
+                brush.type = en;
+                brush.texture = sceneryTextures[en];
+            }
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D0) && !kbs.GetPressedKeys().Contains(Keys.D0) && editor.Count > 0)
+                editor.RemoveAt(editor.Count - 1);
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D9) && !kbs.GetPressedKeys().Contains(Keys.D9))
+            {
+                Map.Scenery plat = new Map.Scenery(brush.type, editorPos);
+                editor.Add(plat);
+            }
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.D1) && !kbs.GetPressedKeys().Contains(Keys.D1))
+            {
+                string str = "";
+                foreach (Map.Scenery e in editor)
+                {
+                    str += "<Item>\n" +
+                        "\t<type>" + e.type + "</type>\n" +
+                        "\t<pos>" + e.pos.X + " " + e.pos.Y + "</pos>\n" +
+                        "</Item>\n";
+                }
+                System.IO.File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Sweet_Chef.txt", str);
+            }
+
+            // Quit to main menu
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.B) && !kbs.GetPressedKeys().Contains(Keys.B) &&
+                gameState != GameStateEnum.MainMenu && gameState != GameStateEnum.StartScreen && gameState != GameStateEnum.Intro)
+            {
+                gameState = GameStateEnum.MainMenu;
+            }
+
             // Pause
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.P) && !kbs.GetPressedKeys().Contains(Keys.P))
             {
@@ -589,7 +758,7 @@ namespace TestGame
                 else if (gameState == GameStateEnum.Paused)
                     gameState = GameStateEnum.Playing;
             }
-
+            
             // Mute
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.M) && !kbs.GetPressedKeys().Contains(Keys.M))
             {
@@ -607,8 +776,6 @@ namespace TestGame
                 if (volume > 1.0f)
                     volume = 1.0f;
             }
-
-            // Volume
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Subtract))
             {
                 volume -= 0.002f;
@@ -617,7 +784,8 @@ namespace TestGame
             }
 
             // Restart level
-            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.R) && !kbs.GetPressedKeys().Contains(Keys.R))
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.R) && !kbs.GetPressedKeys().Contains(Keys.R) &&
+                (gameState == GameStateEnum.Playing || gameState == GameStateEnum.Paused || gameState == GameStateEnum.LevelCompleted || gameState == GameStateEnum.GameOver))
             {
                 RestartLevel();
             }
@@ -661,26 +829,31 @@ namespace TestGame
             // Game hasn't started, main menu screen
             else if (gameState == GameStateEnum.MainMenu)
             {
-                if ((kbs.GetPressedKeys().Contains(Keys.W) && !pkbs.GetPressedKeys().Contains(Keys.W)) ||
-                    (kbs.GetPressedKeys().Contains(Keys.Up) && !pkbs.GetPressedKeys().Contains(Keys.Up)))
+                if ((kbs.GetPressedKeys().Contains(Keys.A) && !pkbs.GetPressedKeys().Contains(Keys.A)) ||
+                    (kbs.GetPressedKeys().Contains(Keys.Left) && !pkbs.GetPressedKeys().Contains(Keys.Left)))
                     startMenu.ChangeOption(-1, startMenu.options.Count);
-                else if ((kbs.GetPressedKeys().Contains(Keys.S) && !pkbs.GetPressedKeys().Contains(Keys.S)) ||
-                    (kbs.GetPressedKeys().Contains(Keys.Down) && !pkbs.GetPressedKeys().Contains(Keys.Down)))
+                else if ((kbs.GetPressedKeys().Contains(Keys.D) && !pkbs.GetPressedKeys().Contains(Keys.D)) ||
+                    (kbs.GetPressedKeys().Contains(Keys.Right) && !pkbs.GetPressedKeys().Contains(Keys.Right)))
                     startMenu.ChangeOption(1, startMenu.options.Count);
                 else if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter))
                 {
                     switch (startMenu.options[startMenu.selectedOption])
                     {
                         case "Start":
+                            player.Initialize(levelMenu.levels.ElementAt(player.GetLevel()).pos);
                             gameState = GameStateEnum.LevelSelection;
                             break;
                         case "Instructions":
+                            gameState = GameStateEnum.Options;
                             break;
                         case "Map":
+                            gameState = GameStateEnum.Options;
                             break;
                         case "Minigames":
+                            gameState = GameStateEnum.Options;
                             break;
                         case "About":
+                            gameState = GameStateEnum.Options;
                             break;
                     }
                 }
@@ -689,13 +862,87 @@ namespace TestGame
             // Game started, level selection screen
             else if(gameState == GameStateEnum.LevelSelection)
             {
+                Vector2 currentPos = player.GetPosition();
+                Vector2 delta = new Vector2(player.prevLevel, Int32.MaxValue);
+                Vector2 newPos;
+                // Moving up
+                if ((kbs.GetPressedKeys().Contains(Keys.W) && !pkbs.GetPressedKeys().Contains(Keys.W)) ||
+                    (kbs.GetPressedKeys().Contains(Keys.Up) && !pkbs.GetPressedKeys().Contains(Keys.Up)))
+                {
+                    for (int i = 0; i < levelMenu.levels.Count; i++)
+                    {
+                        if (currentPos != levelMenu.levels.ElementAt(player.GetLevel()).pos || player.prevLevel != i)
+                        {
+                            newPos = levelMenu.levels.ElementAt(i).pos;
+                            if (newPos.Y - currentPos.Y < 0)
+                            {
+                                float diff = Math.Abs(currentPos.X - newPos.X);
+                                if (diff < delta.Y)
+                                    delta = new Vector2(i, diff);
+                            }
+                        }
+                    }
+                    player.SetLevel((int)delta.X, levelMenu.levels.Count);
+                }
+                // Moving down
+                if ((kbs.GetPressedKeys().Contains(Keys.S) && !pkbs.GetPressedKeys().Contains(Keys.S)) ||
+                    (kbs.GetPressedKeys().Contains(Keys.Down) && !pkbs.GetPressedKeys().Contains(Keys.Down)))
+                {
+                    for (int i = 0; i < levelMenu.levels.Count; i++)
+                    {
+                        if (currentPos != levelMenu.levels.ElementAt(player.GetLevel()).pos || player.prevLevel != i)
+                        {
+                            newPos = levelMenu.levels.ElementAt(i).pos;
+                            if (newPos.Y - currentPos.Y > 0)
+                            {
+                                float diff = Math.Abs(currentPos.X - newPos.X);
+                                if(diff < delta.Y)
+                                    delta = new Vector2(i, diff);
+                            }
+                        }
+                    }
+                    player.SetLevel((int)delta.X, levelMenu.levels.Count);
+                }
+                // Moving left
                 if ((kbs.GetPressedKeys().Contains(Keys.A) && !pkbs.GetPressedKeys().Contains(Keys.A)) ||
                     (kbs.GetPressedKeys().Contains(Keys.Left) && !pkbs.GetPressedKeys().Contains(Keys.Left)))
-                    player.ChangeLevel(-1, levelMenu.levels);
-                else if ((kbs.GetPressedKeys().Contains(Keys.D) && !pkbs.GetPressedKeys().Contains(Keys.D)) ||
+                {
+                    for (int i = 0; i < levelMenu.levels.Count; i++)
+                    {
+                        if (currentPos != levelMenu.levels.ElementAt(player.GetLevel()).pos || player.prevLevel != i)
+                        {
+                            newPos = levelMenu.levels.ElementAt(i).pos;
+                            if (newPos.X - currentPos.X < 0)
+                            {
+                                float diff = Math.Abs(currentPos.Y - newPos.Y);
+                                if (diff < delta.Y)
+                                    delta = new Vector2(i, diff);
+                            }
+                        }
+                    }
+                    player.SetLevel((int)delta.X, levelMenu.levels.Count);
+                }
+                // Moving right
+                if ((kbs.GetPressedKeys().Contains(Keys.D) && !pkbs.GetPressedKeys().Contains(Keys.D)) ||
                     (kbs.GetPressedKeys().Contains(Keys.Right) && !pkbs.GetPressedKeys().Contains(Keys.Right)))
-                    player.ChangeLevel(1, levelMenu.levels);
-                else if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter))
+                {
+                    for (int i = 0; i < levelMenu.levels.Count; i++)
+                    {
+                        if (currentPos != levelMenu.levels.ElementAt(player.GetLevel()).pos || player.prevLevel != i)
+                        {
+                            newPos = levelMenu.levels.ElementAt(i).pos;
+                            if (newPos.X - currentPos.X > 0)
+                            {
+                                float diff = Math.Abs(currentPos.Y - newPos.Y);
+                                if (diff < delta.Y)
+                                    delta = new Vector2(i, diff);
+                            }
+                        }
+                    }
+                    player.SetLevel((int)delta.X, levelMenu.levels.Count);
+                }
+                // Confirm level
+                if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter) && levelMenu.levels.ElementAt(player.GetLevel()).isAvailable)
                 {
                     LoadLevel(player.GetLevel() + 1);
                     InitializeLevel();
@@ -704,15 +951,37 @@ namespace TestGame
                     gameState = GameStateEnum.Playing;
                     elapsedGameTime = TimeSpan.Zero;
                 }
+                // Return to previous menu
+                if (kbs.GetPressedKeys().Contains(Keys.Back) && !pkbs.GetPressedKeys().Contains(Keys.Back))
+                {
+                    gameState = GameStateEnum.MainMenu;
+                }
             }
             // Start screen
             else if (gameState == GameStateEnum.StartScreen)
             {
                 if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter))
                 {
+                    gameState = GameStateEnum.Intro;
+                }
+            }
+            // Options
+            else if (gameState == GameStateEnum.Options)
+            {
+                if (kbs.GetPressedKeys().Contains(Keys.Back) && !pkbs.GetPressedKeys().Contains(Keys.Back))
+                {
                     gameState = GameStateEnum.MainMenu;
                 }
             }
+            // Options
+            else if (gameState == GameStateEnum.Intro)
+            {
+                if (kbs.GetPressedKeys().Contains(Keys.Enter) && !pkbs.GetPressedKeys().Contains(Keys.Enter))
+                {
+                    gameState = GameStateEnum.MainMenu;
+                }
+            }
+
             // Level completed
             if (gameState == GameStateEnum.LevelCompleted)
             {
@@ -754,35 +1023,47 @@ namespace TestGame
                 blinkCounter += gameTime.ElapsedGameTime.Milliseconds;
                 DrawStartScreen();
             }
-            if (gameState == GameStateEnum.GameOver || gameState == GameStateEnum.LevelCompleted)
+            else if (gameState == GameStateEnum.Options)
+            {
+                DrawScreen();
+            }
+            else if (gameState == GameStateEnum.Intro)
+            {
+                DrawIntro();
+            }
+            if (gameState == GameStateEnum.GameOver || gameState == GameStateEnum.LevelCompleted || gameState == GameStateEnum.Intro)
             {
                 blinkCounter += gameTime.ElapsedGameTime.Milliseconds;
             }
 
             // Draw cursor
-            spriteBatch.Begin();
+            //spriteBatch.Begin();
             //spriteBatch.Draw(cursor, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
             //spriteBatch.Draw(cursor, new Vector2(0.0f, (player.GetPosition().Y * 0.25f)), Color.White);
             //spriteBatch.DrawString(spriteFont, gameTime.TotalGameTime.ToString(), new Vector2(100.0f, 100.0f), Color.White);
-            spriteBatch.End();
+            //spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
         void DrawLevelSelection()
         {
-            float scale = 0.375f;
             spriteBatch.Begin();
-            spriteBatch.Draw(levelMenu.background, Vector2.Zero, Color.White);
+            spriteBatch.Draw(levelMenu.background, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, new Vector2((float)width / levelMenu.background.Width, (float)totalHeight / levelMenu.background.Height), SpriteEffects.None, 0);
             spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateScale(scale));
-            spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateScale(levelSelectionScale));
+            foreach (LevelMenu.Level e in levelMenu.levels)
+            {
+                if (!e.isAvailable)
+                    spriteBatch.Draw(uiTextures[UIEnum.Closed], new Vector2(e.pos.X / levelSelectionScale, e.pos.Y / levelSelectionScale), null, Color.White, 0.0f, new Vector2(uiTextures[UIEnum.Closed].Width / 4, uiTextures[UIEnum.Closed].Height), defaultRatio, SpriteEffects.None, 0);
+            }
+            spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), Vector2.Divide(player.GetPosition(), levelSelectionScale), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             spriteBatch.End();
         }
 
         void DrawPlayingScreen()
         {
-            float scale = 0.25f;
+            float scale = 0.375f;
             Matrix translationMatrix = Matrix.CreateTranslation(0.0f, 0.0f, 0.0f);
 
             // Draw background
@@ -794,21 +1075,26 @@ namespace TestGame
             // X settings
             if (player.GetPosition().X - (width / scale / 2) <= 0)
                 translationMatrix.M41 = 0.0f;
-            else if (player.GetPosition().X + (width / scale / 2) >= map.rect.Width)
+            else if (player.GetPosition().X + (width / scale / 2.0f) >= map.rect.Width)
                 translationMatrix.M41 = (int)((-map.rect.Width) + (width / scale));
             else
-                translationMatrix.M41 = (int)(-player.GetPosition().X + (width / scale / 2));
+                translationMatrix.M41 = (int)(-player.GetPosition().X + (width / scale / 2.0f));
 
             // Y settings
-            if (player.GetPosition().Y - (height / scale / 1.15) <= 0)
+            if (player.GetPosition().Y - (totalHeight / scale / 1.25f) <= 0)
                 translationMatrix.M42 = 0.0f;
-            else if (player.GetPosition().Y + (height / scale / 3) >= map.rect.Height)
-                translationMatrix.M42 = (int)((-map.rect.Height) + (height / scale));
+            else if (player.GetPosition().Y + (totalHeight / scale / 5.05f) >= map.rect.Height)
+                translationMatrix.M42 = (int)((-map.rect.Height) + (totalHeight / scale));
             else
-                translationMatrix.M42 = (int)(-player.GetPosition().Y + (height / scale / 1.15));
+                translationMatrix.M42 = (int)(-player.GetPosition().Y + (totalHeight / scale / 1.25f));
             #endregion
 
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, translationMatrix * Matrix.CreateScale(scale));
+
+            // Draw editor DEVELOPMENT
+            if (editor.Count > 0)
+                foreach (Map.Scenery e in editor)
+                    spriteBatch.Draw(sceneryTextures[e.type], e.pos, Color.White);
 
             // Draw scenery
             foreach (MapObject e in mapScenery)
@@ -819,7 +1105,7 @@ namespace TestGame
             // Draw platforms
             foreach (MapObject e in mapPlatforms)
             {
-                spriteBatch.Draw(e.sprite.texture, e.pos, Color.White * e.alpha);
+                spriteBatch.Draw(e.sprite.texture, new Vector2(e.pos.X, e.pos.Y), Color.White * e.alpha);
             }
 
             // Draw items
@@ -858,13 +1144,45 @@ namespace TestGame
                 }
             }*/
             if (player.blink)
-                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, (player.isPoisoned) ? new Color(1.0f, 0.7f, 1.0f, 1.0f) : Color.White * 0.5f, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, Color.White * 0.5f, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
             else
-                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, (player.isPoisoned) ? new Color(1.0f, 0.7f, 1.0f, 1.0f) : Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
-            //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X, mapEnemies.ElementAt(0).pos.Y), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
-            //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X, mapEnemies.ElementAt(0).pos.Y + mapEnemies.ElementAt(0).sprite.rect.Height), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
-            //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X + mapEnemies.ElementAt(0).sprite.rect.Width, mapEnemies.ElementAt(0).pos.Y), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
-            //spriteBatch.Draw(cursor, new Vector2(mapEnemies.ElementAt(0).pos.X + mapEnemies.ElementAt(0).sprite.rect.Width, mapEnemies.ElementAt(0).pos.Y + mapEnemies.ElementAt(0).sprite.rect.Height), null, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
+                spriteBatch.Draw(player.sprites[player.state].textures.ElementAt(player.frame), new Vector2((int)player.GetPosition().X, (int)player.GetPosition().Y), player.sprites[player.state].rect, Color.White, 0.0f, player.sprites[player.state].origin, 1.0f, (player.dir == Direction.Right) ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0.0f);
+            
+            // DEVELOPMENT
+            editorPos.X = (int)(Mouse.GetState().X / scale - translationMatrix.M41);
+            editorPos.Y = (int)(Mouse.GetState().Y / scale - translationMatrix.M42);
+            //DrawString(spriteBatch, "X: " + (Mouse.GetState().X / scale - translationMatrix.M41) + " Y: " + (Mouse.GetState().Y / scale - translationMatrix.M42) , new Vector2((width / scale) - translationMatrix.M41 - spriteFont.MeasureString(Mouse.GetState().ToString()).X * 2, totalHeight / 2 - translationMatrix.M42), 4.0f);
+            spriteBatch.End();
+        }
+
+        void DrawIntro()
+        {
+            string skipStr = "Press ENTER to skip";
+            if (blinkCounter > 750)
+            {
+                blinkCounter = 0;
+                blink ^= true;
+            }
+            Vector2 scale;
+            Texture2D screen = introTextures[(int)(introTimer / updateTime)];
+            scale.X = (float)width / screen.Width;
+            scale.Y = (float)totalHeight / screen.Height;
+            spriteBatch.Begin();
+            spriteBatch.Draw(screen, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
+            if (!blink)
+                DrawString(spriteBatch, skipStr, Vector2.Zero, defaultRatio);
+            spriteBatch.End();
+        }
+
+        void DrawScreen()
+        {
+            Vector2 scale;
+            string option = startMenu.options[startMenu.selectedOption];
+            Texture2D screen = screenTextures[option];
+            scale.X = (float)width / screen.Width;
+            scale.Y = (float)totalHeight / screen.Height;
+            spriteBatch.Begin();
+            spriteBatch.Draw(screen, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
             spriteBatch.End();
         }
 
@@ -873,6 +1191,8 @@ namespace TestGame
             int x = 0;
             float scale = 1.0f;
             float itemsWidth = 0.0f;
+            Texture2D screen;
+            Vector2 screenScale;
             foreach (KeyValuePair<Enum, Sprite> e in itemSprites)
             {
                 scale = hudHeight * 0.75f / e.Value.rect.Height;
@@ -881,7 +1201,6 @@ namespace TestGame
             itemsWidth /= 2.0f;
             x = (int)(- itemsWidth + width / 2);
             string pauseStr = "Pause";
-            string gameOverStr = "Game over";
             string nextLevelStr = "Press ENTER to continue";
             string healthStr = "Health: " + player.GetHealth() + "%";
             spriteBatch.Begin();
@@ -905,59 +1224,61 @@ namespace TestGame
             // Game paused
             if (gameState == GameStateEnum.Paused)
             {
-                spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
+                spriteBatch.Draw(uiTextures[UIEnum.Cover], GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
                 DrawString(spriteBatch, pauseStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(pauseStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(pauseStr).Y / 2), 1.0f);
             }
             // Game over
             else if (gameState == GameStateEnum.GameOver)
             {
+                screen = uiTextures[UIEnum.GameOver];
                 string restartStr = "Press R to restart the level";
+                screenScale.X = (float)width / screen.Width;
+                screenScale.Y = (float)totalHeight / screen.Height;
                 if (blinkCounter > 750)
                 {
                     blinkCounter = 0;
                     blink ^= true;
                 }
-                spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White);
+                spriteBatch.Draw(screen, GraphicsDevice.Viewport.Bounds, Color.White);
                 if (!blink)
                     DrawString(spriteBatch, restartStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(restartStr).X / 2, graphics.PreferredBackBufferHeight / 2 + spriteFont.MeasureString(restartStr).Y), 1.0f);
-                DrawString(spriteBatch, gameOverStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(gameOverStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(gameOverStr).Y / 2), 1.0f);
             }
             // Level completed
             else if (gameState == GameStateEnum.LevelCompleted)
             {
-                string levelCompletedStr = "Level completed!";
+                screen = uiTextures[UIEnum.LevelCompleted];
+                screenScale.X = (float)width / screen.Width;
+                screenScale.Y = (float)totalHeight / screen.Height;
                 if (blinkCounter > 750)
                 {
                     blinkCounter = 0;
                     blink ^= true;
                 }
-                spriteBatch.Draw(cover, GraphicsDevice.Viewport.Bounds, Color.White);
-                DrawString(spriteBatch, levelCompletedStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(levelCompletedStr).X / 2, graphics.PreferredBackBufferHeight / 2 - spriteFont.MeasureString(levelCompletedStr).Y / 2), 1.0f);
-                DrawString(spriteBatch, points.ToString(), Vector2.Zero, 1.0f);
+                spriteBatch.Draw(uiTextures[UIEnum.LevelCompleted], GraphicsDevice.Viewport.Bounds, Color.White);
+                DrawString(spriteBatch, accumStr, Vector2.Multiply(new Vector2(570.0f, 360.0f), defaultRatio), 1.75f * defaultRatio);
+                DrawString(spriteBatch, points.ToString(), Vector2.Multiply(new Vector2(1015.0f, 814.0f), defaultRatio), 1.75f * defaultRatio);
                 if (!blink)
                     DrawString(spriteBatch, nextLevelStr, new Vector2(graphics.PreferredBackBufferWidth / 2 - spriteFont.MeasureString(nextLevelStr).X / 2, graphics.PreferredBackBufferHeight * 0.75f), 1.0f);
             }
-            DrawString(spriteBatch, player.poisonTimer.ToString(), Vector2.Zero, 1.0f);
+            spriteBatch.Draw(brush.texture, new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0.0f, Vector2.Zero, 0.375f, SpriteEffects.None, 0);
+            DrawString(spriteBatch, Mouse.GetState().ToString(), new Vector2(0.0f, 300.0f), 1.75f);
             spriteBatch.End();
         }
 
         void DrawMainMenuScreen()
         {
-            int d, y;
             Vector2 scale;
             scale.X = (float)width / startMenu.background.Width;
             scale.Y = (float)totalHeight / startMenu.background.Height;
-            d = (int)((height + hudHeight) * 0.6 / (startMenu.options.Count - 1));
-            y = (int)((height + hudHeight) * 0.2);
             spriteBatch.Begin();
+            spriteBatch.Draw(rainbow, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
             spriteBatch.Draw(startMenu.background, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
-            foreach (KeyValuePair<int, String> e in startMenu.options)
+            foreach (KeyValuePair<String, Texture2D> e in menuTextures)
             {
-                if (e.Key == startMenu.selectedOption)
-                    DrawString(spriteBatch, e.Value, new Vector2(width / 2 - spriteFont.MeasureString(e.Value).X * 1.3f / 2, y - spriteFont.MeasureString(e.Value).Y * 1.3f / 2), 1.3f);
+                if (e.Key.Equals(startMenu.options[startMenu.selectedOption]))
+                    spriteBatch.Draw(menuHiTextures[e.Key], new Vector2(0.0f, -50.0f), null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
                 else
-                    DrawString(spriteBatch, e.Value, new Vector2(width / 2 - spriteFont.MeasureString(e.Value).X / 2, y - spriteFont.MeasureString(e.Value).Y / 2), 1.0f);
-                y += d;
+                    spriteBatch.Draw(e.Value, Vector2.Zero, null, Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
             }
             spriteBatch.End();
         }
@@ -1014,29 +1335,40 @@ namespace TestGame
                     player.pos = Vector2.Subtract(player.pos, player.GetJump());
                     player.UpdateJump(gravity);
                 }
-
                 if (player.isFalling)
                 {
                     player.pos = Vector2.Add(gravity, player.pos);
                 }
+
+                // Player fell off-map
+                if (player.GetPosition().Y - player.sprites[player.state].rect.Height > map.rect.Height)
+                    player.UpdateHealth(-100.0f);
             }
             else if (gameState == GameStateEnum.LevelSelection)
             {
                 Vector2 v1, v2, v3;
-                v1 = new Vector2(levelMenu.positions[player.GetLevel()].X - player.GetPosition().X, levelMenu.positions[player.GetLevel()].Y - player.GetPosition().Y);
+                v1 = new Vector2(levelMenu.levels.ElementAt(player.GetLevel()).pos.X - player.GetPosition().X, levelMenu.levels.ElementAt(player.GetLevel()).pos.Y - player.GetPosition().Y);
                 v2 = v1;
                 v1.Normalize();
                 v1 *= player.speed / 2;
                 v3 = (v1.Length() < v2.Length()) ? v1 : v2;
-                if (player.pos != levelMenu.positions[player.GetLevel()])
+                if (player.pos != levelMenu.levels.ElementAt(player.GetLevel()).pos)
                 {
-                    player.SetVelocity(v3);
+                    Vector2 moveTo = new Vector2(v3.X * levelSelectionScale, v3.Y * levelSelectionScale);
+                    if (Math.Abs(moveTo.X) < 1)
+                        moveTo.X = 1 * Math.Sign(moveTo.X);
+                    if (Math.Abs(moveTo.Y) < 1)
+                        moveTo.Y = 1 * Math.Sign(moveTo.Y);
+                    player.SetVelocity(moveTo);
                 }
                 else
+                {
                     player.SetVelocity(Vector2.Zero);
+                    player.prevLevel = player.GetLevel();
+                }
             }
-
-            player.pos = Vector2.Add(player.GetVelocity(), player.pos);
+            player.SetPosition(Vector2.Add(player.GetVelocity(), player.pos));
+            //player.pos = Vector2.Add(player.GetVelocity(), player.pos);
         }
 
         void UpdatePlayerAnimation()
@@ -1177,14 +1509,10 @@ namespace TestGame
                         e.isAlive = false;
                     if (!player.isInvincible && e.isAlive && player.state != PlayerSpriteEnum.Handing)
                     {
-                        player.SetHealth(-e.damage);
-                        player.isInvincible = true;
+                        player.UpdateHealth(-e.damage);
+                        if (player.GetHealth() > 0)
+                            player.isInvincible = true;
                     }
-                    if (e.poisonTimer != 0)
-                    {
-                        player.SetPoisonTimer(e.poisonTimer);
-                    }
-
                 }
                 e.collision = false;
             }
@@ -1228,8 +1556,13 @@ namespace TestGame
                     }
                     else if (e.isAlive)
                     {
-                        player.SetHealth(-e.damage);
-                        e.isAlive = false;
+                        if (!player.isInvincible && player.state != PlayerSpriteEnum.Handing)
+                        {
+                            player.UpdateHealth(-e.damage);
+                            if (player.GetHealth() > 0)
+                                player.isInvincible = true;
+                            e.isAlive = false;
+                        }
                     }
                 }
             }

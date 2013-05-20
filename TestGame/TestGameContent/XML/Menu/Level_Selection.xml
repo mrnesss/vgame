@@ -2,8 +2,23 @@
 <XnaContent>
   <Asset Type="SharedContent.LevelMenu">
     <bg>LevelSelect</bg>
-    <levels>3</levels>
-    <positions>400 700 1400 1200 2300 1000</positions>
+    <levels>
+      <Item>
+        <level>0</level>
+        <pos>870 375</pos>
+        <isAvailable>true</isAvailable>
+      </Item>
+      <Item>
+        <level>1</level>
+        <pos>240 600</pos>
+        <isAvailable>false</isAvailable>
+      </Item>
+      <Item>
+        <level>2</level>
+        <pos>995 890</pos>
+        <isAvailable>false</isAvailable>
+      </Item>
+    </levels>
   </Asset>
 </XnaContent>
 
